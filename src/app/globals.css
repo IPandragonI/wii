@@ -1,0 +1,399 @@
+@import "tailwindcss";
+
+/*
+ * Console channel-menu look: near-white lined backdrop, light gray rounded channel frames,
+ * one light-blue accent for pointing and focus, gray rounded lettering, soft shadows.
+ */
+@theme {
+  --font-sans: var(--font-rounded), ui-rounded, "Segoe UI", system-ui, sans-serif;
+  --font-segments: var(--font-dseg), ui-monospace, monospace;
+
+  --color-wii-bg: #f3f4f5;
+  --color-wii-surface: #ffffff;
+  --color-wii-panel: #eceef0;
+  --color-wii-line: #c4c8cd;
+  --color-wii-line-soft: #dfe2e5;
+  --color-wii-ink: #5d6168;
+  --color-wii-ink-strong: #43464b;
+  --color-wii-ink-soft: #9a9fa6;
+  --color-wii-cyan: #34beed;
+  --color-wii-cyan-soft: #dcf3fc;
+  --color-wii-blue: #129ad8;
+  --color-wii-green: #3aa55d;
+  --color-wii-amber: #c98a0b;
+
+  --shadow-channel: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 2px 5px rgb(40 50 60 / 0.1);
+  --shadow-channel-hover: 0 0 0 3px rgb(52 190 237 / 0.45), 0 0 16px rgb(52 190 237 / 0.45);
+  --shadow-panel: 0 1px 2px rgb(40 50 60 / 0.06), 0 8px 24px rgb(40 50 60 / 0.06);
+
+  --ease-wii: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--color-wii-bg);
+    /* Fine horizontal lines across the whole backdrop. */
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 0.85) 0,
+      rgb(255 255 255 / 0.85) 2px,
+      transparent 2px,
+      transparent 4px
+    );
+    color: var(--color-wii-ink);
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-wii-cyan);
+    outline-offset: 3px;
+    border-radius: 12px;
+  }
+
+  ::selection {
+    background: var(--color-wii-cyan-soft);
+  }
+}
+
+/* Pointing-hand cursor for mouse users (Settings can switch back to the system cursor). */
+@media (pointer: fine) {
+  html[data-cursor="hand"],
+  html[data-cursor="hand"] * {
+    cursor: url("/cursor/hand.svg") 9 1, auto;
+  }
+  html[data-cursor="hand"] :is(a, button, label, summary, [role="button"], [role="switch"]) {
+    cursor: url("/cursor/hand.svg") 9 1, pointer;
+  }
+}
+
+/* Interface chrome (menu, bars, tiles) is not selectable; its decorative images and icons are not draggable. */
+.select-none :is(img, svg) {
+  -webkit-user-drag: none;
+}
+
+@layer components {
+  /* Wide rounded buttons, like the "Start" button on a channel preview. */
+  .wii-button {
+    display: inline-flex;
+    min-height: 3.25rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 3rem;
+    border: 3px solid var(--color-wii-line);
+    background: linear-gradient(to bottom, #ffffff 0%, #ffffff 45%, #eceef0 100%);
+    padding: 0 1.75rem;
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: var(--color-wii-ink);
+    box-shadow: var(--shadow-channel);
+    transition:
+      border-color 140ms ease,
+      box-shadow 140ms ease,
+      transform 140ms ease,
+      color 140ms ease;
+  }
+
+  .wii-button:hover,
+  .wii-button:focus-visible {
+    border-color: var(--color-wii-cyan);
+    color: var(--color-wii-blue);
+    box-shadow: var(--shadow-channel-hover);
+    outline: none;
+  }
+
+  .wii-button:active {
+    transform: scale(0.97);
+  }
+
+  .wii-button-primary {
+    color: var(--color-wii-blue);
+  }
+
+  .wii-panel {
+    border-radius: 1.5rem;
+    border: 2px solid var(--color-wii-line-soft);
+    background: var(--color-wii-surface);
+    box-shadow: var(--shadow-panel);
+  }
+
+  /* Channel frame: the pointed channel gets a pulsing light-blue glow. */
+  .wii-channel::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: -4px;
+    border-radius: 22px;
+    border: 3px solid var(--color-wii-cyan);
+    box-shadow:
+      0 0 14px 2px rgb(52 190 237 / 0.55),
+      inset 0 0 8px rgb(52 190 237 / 0.35);
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+
+  .wii-channel:hover::after,
+  .wii-channel:focus-visible::after {
+    opacity: 1;
+    animation: wii-pulse 0.9s ease-in-out infinite alternate;
+  }
+
+  /* Banner ambience. */
+  .wii-banner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.022) 0 1px, transparent 1px 4px);
+  }
+
+  .wii-bokeh {
+    position: absolute;
+    border-radius: 9999px;
+    background: radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--tint) 24%, white), transparent 70%);
+    animation: wii-drift 9s ease-in-out infinite alternate;
+  }
+
+  .wii-bokeh-slow {
+    animation-duration: 13s;
+    animation-delay: -4s;
+  }
+
+  .wii-logo {
+    animation: wii-bob 3.4s ease-in-out infinite;
+  }
+
+  .wii-shine::after {
+    content: "";
+    position: absolute;
+    inset: -20% auto -20% -40%;
+    width: 30%;
+    background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.85), transparent);
+    transform: skewX(-18deg);
+    animation: wii-shine 5.5s ease-in-out infinite;
+    will-change: transform;
+  }
+}
+
+@keyframes wii-pulse {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes wii-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(6cqh, -5cqh, 0);
+  }
+}
+
+@keyframes wii-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2.2cqh);
+  }
+}
+
+@keyframes wii-shine {
+  0%,
+  70% {
+    transform: skewX(-18deg) translateX(0);
+  }
+  100% {
+    transform: skewX(-18deg) translateX(600%);
+  }
+}
+
+/* Reduced motion: ambient loops stop entirely; everything else becomes instant. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .wii-bokeh,
+  .wii-logo,
+  .wii-shine::after {
+    animation: none !important;
+  }
+}
+
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+html[data-motion="reduced"] .wii-bokeh,
+html[data-motion="reduced"] .wii-logo,
+html[data-motion="reduced"] .wii-shine::after {
+  animation: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+ * Banner scenes and Mii. Every loop animates only transform or opacity, and every
+ * one stops under reduced motion (see the .wii-ambient rules at the end).
+ * ------------------------------------------------------------------------- */
+.wii-cloud { animation: wii-cloud 14s ease-in-out infinite alternate; }
+.wii-cloud-slow { animation-duration: 19s; }
+.wii-waves { animation: wii-waves 6s linear infinite; }
+.wii-lane { animation: wii-lane 0.9s linear infinite; }
+.wii-bounce { animation: wii-bounce 1.6s ease-in-out infinite; }
+.wii-twinkle { animation: wii-twinkle 2.6s ease-in-out infinite; }
+.wii-sway { transform-origin: 60% 100%; animation: wii-sway 5s ease-in-out infinite alternate; }
+
+/* Chess: the knight hops two squares and back; the best-move arrow and eval bar follow. */
+.wii-knight { animation: wii-knight 6s ease-in-out infinite; }
+.wii-arrow { animation: wii-arrow 6s ease-in-out infinite; }
+.wii-eval { animation: wii-eval 6s ease-in-out infinite; }
+
+/* Car quiz */
+.wii-streak { animation: wii-streak 2.4s linear infinite; }
+.wii-viewfinder { animation: wii-viewfinder 5s ease-in-out infinite; }
+.wii-flash { opacity: 0; animation: wii-flash 5s ease-out infinite; }
+
+/* Guitar tuner */
+.wii-string { transform-origin: center; animation: wii-string 0.2s ease-in-out infinite alternate; }
+.wii-needle { animation: wii-needle 4.5s ease-in-out infinite; }
+
+/* Darts */
+.wii-spin-slow { animation: wii-spin 60s linear infinite; }
+.wii-dart { opacity: 0; animation: wii-dart 4.8s cubic-bezier(0.2, 0.7, 0.3, 1) infinite; }
+.wii-impact { opacity: 0; animation: wii-impact 4.8s ease-out infinite; }
+.wii-throw { opacity: 0.25; animation: wii-throw 4.8s steps(1) infinite; }
+
+/* Neural network */
+.wii-pulse-line { animation: wii-pulse-line 2.2s linear infinite; }
+.wii-node { animation: wii-node 2.8s ease-in-out infinite; }
+
+/* Arcade and web apps */
+.wii-scroll { animation: wii-scroll 6s linear infinite; }
+.wii-blob { animation: wii-blob 16s ease-in-out infinite alternate; }
+.wii-blob-slow { animation-duration: 22s; animation-direction: alternate-reverse; }
+.wii-wave-tile { opacity: 0.08; animation: wii-wave-tile 3.2s ease-in-out infinite; }
+.wii-ring { opacity: 0; animation: wii-ring 4.4s ease-out infinite; }
+.wii-flow { animation: wii-flow 7s ease-in-out infinite alternate; }
+
+.mii-blink { transform-box: fill-box; transform-origin: center; animation: mii-blink 4.6s ease-in-out infinite; }
+.mii-breathe { transform-box: fill-box; transform-origin: bottom center; animation: mii-breathe 3.8s ease-in-out infinite; }
+
+@keyframes wii-cloud { from { transform: translateX(0); } to { transform: translateX(14cqh); } }
+@keyframes wii-waves { from { transform: translateX(0); } to { transform: translateX(20cqh); } }
+@keyframes wii-lane { from { transform: translateY(0); } to { transform: translateY(12cqh); } }
+@keyframes wii-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.6cqh); } }
+@keyframes wii-twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.8); } 50% { opacity: 0.9; transform: scale(1); } }
+@keyframes wii-sway { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+
+@keyframes wii-knight {
+  0%, 30% { transform: translate(0, 0); }
+  38% { transform: translate(8cqh, -9cqh); }
+  46%, 75% { transform: translate(16cqh, -2cqh); }
+  83% { transform: translate(8cqh, -9cqh); }
+  91%, 100% { transform: translate(0, 0); }
+}
+@keyframes wii-arrow { 0%, 8%, 32%, 100% { opacity: 0; } 14%, 26% { opacity: 1; } }
+@keyframes wii-eval { 0%, 40% { transform: scaleY(0.52); } 50%, 85% { transform: scaleY(0.72); } 95%, 100% { transform: scaleY(0.52); } }
+
+@keyframes wii-streak {
+  from { opacity: 0; transform: translateX(0); }
+  15% { opacity: 1; }
+  to { opacity: 0; transform: translateX(200cqh); }
+}
+@keyframes wii-viewfinder { 0%, 70%, 100% { transform: scale(1); } 78% { transform: scale(0.92); } 86% { transform: scale(1); } }
+@keyframes wii-flash { 0%, 79% { opacity: 0; } 80% { opacity: 0.75; } 92%, 100% { opacity: 0; } }
+
+@keyframes wii-string { from { transform: scaleY(1); } to { transform: scaleY(2.2); } }
+@keyframes wii-needle {
+  0% { transform: translateX(-24cqh) rotate(-8deg); }
+  35% { transform: translateX(12cqh) rotate(6deg); }
+  60% { transform: translateX(-4cqh) rotate(-2deg); }
+  80%, 100% { transform: translateX(0) rotate(0); }
+}
+
+@keyframes wii-spin { to { transform: rotate(360deg); } }
+@keyframes wii-dart {
+  0% { opacity: 0; transform: translate(60cqh, -14cqh) rotate(-8deg); }
+  8% { opacity: 1; }
+  18% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  80% { opacity: 1; transform: translate(0, 0) rotate(0); }
+  92%, 100% { opacity: 0; transform: translate(0, 0) rotate(0); }
+}
+@keyframes wii-impact { 0%, 17% { opacity: 0; transform: scale(0.4); } 19% { opacity: 0.9; } 34%, 100% { opacity: 0; transform: scale(1.8); } }
+@keyframes wii-throw { 0%, 18% { opacity: 0.25; } 19%, 92% { opacity: 1; } 93%, 100% { opacity: 0.25; } }
+
+@keyframes wii-pulse-line { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+@keyframes wii-node { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+
+@keyframes wii-scroll { from { transform: translateX(0); } to { transform: translateX(-48cqh); } }
+@keyframes wii-blob { from { transform: translate(0, 0) scale(1); } to { transform: translate(18cqh, 8cqh) scale(1.15); } }
+@keyframes wii-wave-tile { 0%, 100% { opacity: 0.08; transform: scale(0.9); } 40% { opacity: 0.32; transform: scale(1); } }
+@keyframes wii-ring { 0% { opacity: 0.45; transform: scale(0.2); } 100% { opacity: 0; transform: scale(1.4); } }
+@keyframes wii-flow { from { transform: translateX(-20cqh) rotate(-8deg); } to { transform: translateX(20cqh) rotate(-8deg); } }
+
+@keyframes mii-blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+@keyframes mii-breathe { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.012); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .wii-ambient,
+  .mii-blink,
+  .mii-breathe {
+    animation: none !important;
+  }
+}
+html[data-motion="reduced"] .wii-ambient,
+html[data-motion="reduced"] .mii-blink,
+html[data-motion="reduced"] .mii-breathe {
+  animation: none !important;
+}
+
+/* Built-in channel scenes (Projects, GitHub, About, LinkedIn, Contact). */
+.wii-float { animation: wii-float 4.2s ease-in-out infinite; }
+.wii-cell { animation: wii-cell 3s ease-in-out infinite; }
+.wii-sweep { animation: wii-sweep 5s ease-in-out infinite; }
+.wii-commit { animation: wii-commit 4s linear infinite; }
+.wii-wave-frame { animation: wii-wave-frame 0.9s steps(1) infinite; }
+.wii-pop { transform-origin: 0 100%; animation: wii-pop 4s ease-out infinite; }
+.wii-connect { animation: wii-connect 2.6s ease-in-out infinite; }
+.wii-plane { animation: wii-plane 6s ease-in-out infinite; }
+.wii-letter { animation: wii-letter 4.8s ease-in-out infinite; }
+.wii-notify { animation: wii-notify 2.4s ease-in-out infinite; }
+
+@keyframes wii-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2cqh); } }
+@keyframes wii-cell { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes wii-sweep { 0% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 70% { opacity: 1; } 100% { transform: translateX(130cqh); opacity: 0; } }
+@keyframes wii-commit { from { transform: translateX(0); } to { transform: translateX(140cqh); } }
+@keyframes wii-wave-frame { 0% { opacity: 0; } 50% { opacity: 1; } }
+@keyframes wii-pop {
+  0%, 8% { opacity: 0; transform: scale(0.6); }
+  16% { opacity: 1; transform: scale(1.06); }
+  22%, 80% { opacity: 1; transform: scale(1); }
+  90%, 100% { opacity: 0; transform: scale(0.9); }
+}
+@keyframes wii-connect { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+@keyframes wii-plane {
+  0% { opacity: 0; transform: translate(0, 0) rotate(-12deg); }
+  10% { opacity: 1; }
+  45% { transform: translate(60cqh, -12cqh) rotate(6deg); }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translate(140cqh, -6cqh) rotate(-4deg); }
+}
+@keyframes wii-letter { 0%, 20% { transform: translateY(22%); } 45%, 75% { transform: translateY(-14%); } 100% { transform: translateY(22%); } }
+@keyframes wii-notify { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
