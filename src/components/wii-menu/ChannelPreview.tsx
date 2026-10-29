@@ -5,6 +5,7 @@ import { motion, useAnimate } from "motion/react";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 
 import { BANNER_ASPECT, ChannelArt } from "@/components/ui/ChannelArt";
+import { useMessages } from "@/i18n/client";
 import type { MenuChannel } from "@/lib/menu";
 import { prefersReducedMotion, useScreenNavigation } from "@/lib/screen-transition";
 import { playSound } from "@/lib/sound";
@@ -49,6 +50,7 @@ export function ChannelPreview({ channel, origin, onClosing, onClosed }: Channel
   const [busy, setBusy] = useState(true);
   const titleId = useId();
   const { enterChannel } = useScreenNavigation();
+  const t = useMessages();
 
   const geometry = () => {
     const width = window.innerWidth;
@@ -143,7 +145,7 @@ export function ChannelPreview({ channel, origin, onClosing, onClosed }: Channel
       style={initial.reduced ? undefined : { clipPath: initial.clip }}
     >
       <h2 id={titleId} className="sr-only">
-        {channel.title} channel
+        {t.common.channelLabel(channel.title)}
       </h2>
       <div
         data-zoom
@@ -158,6 +160,7 @@ export function ChannelPreview({ channel, origin, onClosing, onClosed }: Channel
           accent={channel.accent}
           banner={channel.banner}
           tint={channel.tint}
+          greeting={t.common.hello}
         />
       </div>
 
@@ -173,7 +176,7 @@ export function ChannelPreview({ channel, origin, onClosing, onClosed }: Channel
           onPointerEnter={() => playSound("buttonHover")}
           className="wii-button h-16 w-[min(40vw,17rem)] text-xl sm:h-[4.5rem] sm:text-2xl"
         >
-          Menu
+          {t.common.menu}
         </button>
         <button
           ref={startRef}
@@ -183,8 +186,8 @@ export function ChannelPreview({ channel, origin, onClosing, onClosed }: Channel
           className="wii-button wii-button-primary h-16 w-[min(40vw,17rem)] text-xl sm:h-[4.5rem] sm:text-2xl"
         >
           <Play aria-hidden="true" size={20} className="fill-current" />
-          Start
-          {launchUrl && <span className="sr-only">(opens {channel.title} in a new tab)</span>}
+          {t.common.start}
+          {launchUrl && <span className="sr-only">{t.common.opensInNewTab(channel.title)}</span>}
         </button>
       </motion.div>
     </div>

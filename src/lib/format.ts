@@ -1,12 +1,13 @@
-const DATE_FORMAT = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" });
+import { DEFAULT_LOCALE, INTL_LOCALE, type Locale } from "@/i18n/config";
 
 /** Formats an ISO timestamp for server-rendered pages. Returns undefined for missing or invalid input. */
-export function formatDate(iso: string | undefined): string | undefined {
+export function formatDate(iso: string | undefined, locale: Locale = DEFAULT_LOCALE): string | undefined {
   if (!iso) return undefined;
   const time = Date.parse(iso);
-  return Number.isNaN(time) ? undefined : DATE_FORMAT.format(time);
+  if (Number.isNaN(time)) return undefined;
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale], { dateStyle: "medium", timeZone: "UTC" }).format(time);
 }
 
-export function formatCount(value: number | undefined): string | undefined {
-  return value === undefined ? undefined : new Intl.NumberFormat("en-US", { notation: "compact" }).format(value);
+export function formatCount(value: number | undefined, locale: Locale = DEFAULT_LOCALE): string | undefined {
+  return value === undefined ? undefined : new Intl.NumberFormat(INTL_LOCALE[locale], { notation: "compact" }).format(value);
 }

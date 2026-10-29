@@ -1,39 +1,69 @@
-/** Shared layout for generated social preview images (rendered by next/og, so inline styles only). */
-export function OgCard({ title, subtitle, accent = "#2cb7ea" }: { title: string; subtitle: string; accent?: string }) {
-  return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        background: "#f4f5f7",
-        padding: 56,
-        fontFamily: "sans-serif",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flex: 1,
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          background: "#ffffff",
-          border: "6px solid #cfd3d8",
-          borderRadius: 48,
-          boxShadow: `0 0 0 6px ${accent}33`,
-        }}
-      >
-        <div style={{ fontSize: 84, fontWeight: 800, color: "#34373b", textAlign: "center", padding: "0 48px" }}>{title}</div>
-        <div style={{ marginTop: 16, fontSize: 36, color: "#8a8f96" }}>{subtitle}</div>
-      </div>
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 28 }}>
-        <div style={{ width: 220, height: 14, borderRadius: 7, background: accent }} />
-      </div>
-    </div>
-  );
-}
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+
+import { ImageResponse } from "next/og";
+
+import type { ChannelScene } from "@/types/project";
+
+/**
+ * Social preview images (rendered by next/og, so inline styles only).
+ *
+ * The animated banner scenes can't be rendered by next/og, so each scene has a still
+ * 1200×630 frame in assets/og-scenes, captured from the real component. A card shows the
+ * project's own scene inside a console-style channel frame, with a title plate.
+ */
 
 export const OG_SIZE = { width: 1200, height: 630 };
+
+async function sceneFrame(scene: ChannelScene): Promise<string | undefined> {
+  try {
+    const file = await readFile(join(process.cwd(), "assets/og-scenes", `${scene}.jpg`));
+    return `data:image/jpeg;base64,${file.toString("base64")}`;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function sceneOgImage({ scene, title, subtitle }: { scene: ChannelScene; title: string; subtitle?: string }) {
+  const frame = await sceneFrame(scene);
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", background: "#e7e9ec", padding: 28, fontFamily: "sans-serif" }}>
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            flex: 1,
+            overflow: "hidden",
+            borderRadius: 44,
+            border: "8px solid #c9cdd1",
+            background: "#ffffff",
+            boxShadow: "0 0 0 6px rgba(52, 190, 237, 0.35)",
+          }}
+        >
+          {frame && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={frame} alt="" width={1128} height={574} style={{ position: "absolute", inset: 0, objectFit: "cover" }} />
+          )}
+          <div style={{ position: "absolute", left: 0, right: 0, bottom: 34, display: "flex", justifyContent: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                background: "rgba(255, 255, 255, 0.94)",
+                borderRadius: 32,
+                padding: "18px 44px",
+                boxShadow: "0 8px 28px rgba(0, 0, 0, 0.15)",
+              }}
+            >
+              <div style={{ fontSize: 64, fontWeight: 800, color: "#4f545b" }}>{title}</div>
+              {subtitle && <div style={{ marginTop: 6, fontSize: 30, color: "#8a8f96" }}>{subtitle}</div>}
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    OG_SIZE,
+  );
+}

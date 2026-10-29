@@ -5,6 +5,8 @@ import { useEffect, useRef, type ReactNode } from "react";
 
 import { ChannelIcon } from "@/components/ui/ChannelIcon";
 import { ConsoleBar, ConsoleRoundButton } from "@/components/ui/ConsoleBar";
+import { localePath } from "@/i18n/config";
+import { useLocale, useMessages } from "@/i18n/client";
 import { openHomeMenu } from "@/lib/home-menu";
 import { TINTS, type TintName } from "@/lib/menu";
 import { revealScreen, useScreenNavigation } from "@/lib/screen-transition";
@@ -28,6 +30,8 @@ interface ChannelScreenProps {
  * The screen fades in from white; Escape fades back to the menu.
  */
 export function ChannelScreen({ title, eyebrow, icon, category, tint = "cyan", children, actions }: ChannelScreenProps) {
+  const t = useMessages();
+  const locale = useLocale();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const { returnToMenu } = useScreenNavigation();
   const colors = TINTS[tint];
@@ -48,7 +52,7 @@ export function ChannelScreen({ title, eyebrow, icon, category, tint = "cyan", c
   }, [returnToMenu]);
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div lang={locale} className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-20 select-none border-b-2 border-[#d3d7db] bg-gradient-to-b from-white to-[#eceef1] shadow-[0_2px_10px_rgb(0_0_0/0.06)]">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-8 sm:py-4 lg:px-12">
           {(icon || category) && (
@@ -77,10 +81,10 @@ export function ChannelScreen({ title, eyebrow, icon, category, tint = "cyan", c
 
       <footer className="sticky bottom-0 z-20 select-none">
         <ConsoleBar
-          label="Channel controls"
+          label={t.common.channelControls}
           left={(size) => (
             <ConsoleRoundButton
-              label="HOME Menu and settings"
+              label={t.common.homeMenuButton}
               size={size}
               haspopup
               onClick={() => openHomeMenu({ inChannel: true })}
@@ -90,9 +94,9 @@ export function ChannelScreen({ title, eyebrow, icon, category, tint = "cyan", c
           center={() => actions}
           right={(size) => (
             <ConsoleRoundButton
-              label="Back to Menu"
+              label={t.common.backToMenu}
               size={size}
-              href="/"
+              href={localePath(locale, "/")}
               onClick={(event) => {
                 event.preventDefault();
                 void returnToMenu();

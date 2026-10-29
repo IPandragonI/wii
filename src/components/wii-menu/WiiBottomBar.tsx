@@ -5,11 +5,15 @@ import { motion } from "motion/react";
 
 import { ConsoleBar, ConsoleRoundButton } from "@/components/ui/ConsoleBar";
 import { WiiClock } from "@/components/wii-menu/WiiClock";
+import { localePath } from "@/i18n/config";
+import { useLocale, useMessages } from "@/i18n/client";
 import { openHomeMenu } from "@/lib/home-menu";
 import { playSound } from "@/lib/sound";
 
 /** The menu's bottom bar: options on the left, the clock in the middle, messages on the right. */
 export function WiiBottomBar({ hidden = false }: { hidden?: boolean }) {
+  const t = useMessages();
+  const locale = useLocale();
   return (
     <motion.footer
       className="sticky bottom-0 z-20 mt-auto"
@@ -17,11 +21,11 @@ export function WiiBottomBar({ hidden = false }: { hidden?: boolean }) {
       transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
     >
       <ConsoleBar
-        label="Menu bar"
+        label={t.common.menuBar}
         raised
         left={(size) => (
           <ConsoleRoundButton
-            label="HOME Menu and settings"
+            label={t.common.homeMenuButton}
             size={size}
             haspopup
             onClick={() => openHomeMenu({ inChannel: false })}
@@ -31,9 +35,9 @@ export function WiiBottomBar({ hidden = false }: { hidden?: boolean }) {
         center={(compact) => <WiiClock compact={compact} />}
         right={(size) => (
           <ConsoleRoundButton
-            label="Contact"
+            label={t.common.contact}
             size={size}
-            href="/contact"
+            href={localePath(locale, "/contact")}
             onClick={() => playSound("start")}
             icon={<Mail aria-hidden="true" size={size === "large" ? 30 : 22} strokeWidth={2.25} />}
           />

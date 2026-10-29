@@ -1,5 +1,7 @@
 import { menuLayout, systemChannels, type SystemChannelId } from "@/config/menu";
 import { linkedinUrl } from "@/config/profile";
+import { DEFAULT_LOCALE, localePath, type Locale } from "@/i18n/config";
+import { categoryLabel, messagesFor } from "@/i18n/messages";
 import { safeExternalUrl } from "@/lib/url";
 import type { ChannelScene, PortfolioProject } from "@/types/project";
 
@@ -63,13 +65,12 @@ const SYSTEM_CHANNEL_ENABLED: Partial<Record<SystemChannelId, () => boolean>> = 
   linkedin: () => Boolean(linkedinUrl()),
 };
 
-export function projectChannel(project: PortfolioProject): MenuChannel {
-  console.log(project);
+export function projectChannel(project: PortfolioProject, locale: Locale = DEFAULT_LOCALE): MenuChannel {
   return {
     key: project.id,
     title: project.name,
-    subtitle: project.category,
-    href: `/projects/${project.slug}`,
+    subtitle: categoryLabel(locale, project.category),
+    href: localePath(locale, `/projects/${project.slug}`),
     icon: project.channelIcon,
     category: project.category,
     accent: project.siteColor,
@@ -79,17 +80,18 @@ export function projectChannel(project: PortfolioProject): MenuChannel {
   };
 }
 
-export function buildMenuChannels(featured: PortfolioProject[]): MenuChannel[] {
+export function buildMenuChannels(featured: PortfolioProject[], locale: Locale = DEFAULT_LOCALE): MenuChannel[] {
+  const text = messagesFor(locale).channels;
   return menuLayout.flatMap((entry): MenuChannel[] => {
-    if (entry === "featured") return featured.map(projectChannel);
+    if (entry === "featured") return featured.map((project) => projectChannel(project, locale));
     if (SYSTEM_CHANNEL_ENABLED[entry]?.() === false) return [];
     const channel = systemChannels[entry];
     return [
       {
         key: `system-${channel.id}`,
-        title: channel.title,
-        subtitle: channel.tagline,
-        href: channel.href,
+        title: text[channel.id].title,
+        subtitle: text[channel.id].tagline,
+        href: localePath(locale, channel.href),
         icon: channel.icon,
         banner: channel.id,
         tint: SYSTEM_TINTS[channel.id] ?? "slate",

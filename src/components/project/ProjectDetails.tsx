@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 
 import { ProjectPreview } from "@/components/project/ProjectPreview";
 import { formatCount, formatDate } from "@/lib/format";
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/config";
+import { messagesFor } from "@/i18n/messages";
 import type { PortfolioProject } from "@/types/project";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -14,20 +16,21 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-export function ProjectDetails({ project }: { project: PortfolioProject }) {
+export function ProjectDetails({ project, locale = DEFAULT_LOCALE }: { project: PortfolioProject; locale?: Locale }) {
+  const t = messagesFor(locale).project;
   const facts = [
-    { label: "Last update", value: formatDate(project.lastUpdatedAt), Icon: CalendarClock },
-    { label: "Last production deployment", value: formatDate(project.lastDeploymentAt), Icon: Rocket },
-    { label: "Stars", value: formatCount(project.githubStars), Icon: Star },
-    { label: "Forks", value: formatCount(project.githubForks), Icon: GitFork },
+    { label: t.lastUpdate, value: formatDate(project.lastUpdatedAt, locale), Icon: CalendarClock },
+    { label: t.lastDeployment, value: formatDate(project.lastDeploymentAt, locale), Icon: Rocket },
+    { label: t.stars, value: formatCount(project.githubStars, locale), Icon: Star },
+    { label: t.forks, value: formatCount(project.githubForks, locale), Icon: GitFork },
   ].filter((fact) => fact.value !== undefined);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
       <div className="space-y-6">
-        <ProjectPreview project={project} />
+        <ProjectPreview project={project} locale={locale} />
         {(project.description || project.details) && (
-          <Section title="About this project">
+          <Section title={t.about}>
             {project.description && <p className="text-lg leading-relaxed text-wii-ink-strong">{project.description}</p>}
             {project.details &&
               project.details.split(/\n{2,}/).map((paragraph) => (
@@ -38,7 +41,7 @@ export function ProjectDetails({ project }: { project: PortfolioProject }) {
           </Section>
         )}
         {project.highlights.length > 0 && (
-          <Section title="Implementation notes">
+          <Section title={t.notes}>
             <ul className="space-y-2">
               {project.highlights.map((highlight) => (
                 <li key={highlight} className="flex gap-3 leading-relaxed">
@@ -53,7 +56,7 @@ export function ProjectDetails({ project }: { project: PortfolioProject }) {
 
       <aside className="space-y-6">
         {project.technologies.length > 0 && (
-          <Section title="Built with">
+          <Section title={t.builtWith}>
             <ul className="flex flex-wrap gap-2">
               {project.technologies.map((technology) => (
                 <li
@@ -68,7 +71,7 @@ export function ProjectDetails({ project }: { project: PortfolioProject }) {
         )}
 
         {facts.length > 0 && (
-          <Section title="Details">
+          <Section title={t.details}>
             <dl className="divide-y divide-wii-line-soft">
               {facts.map(({ label, value, Icon }) => (
                 <div key={label} className="flex items-center justify-between gap-4 py-2.5 first:pt-0 last:pb-0">
@@ -85,7 +88,7 @@ export function ProjectDetails({ project }: { project: PortfolioProject }) {
 
         {!project.productionUrl && project.source === "live" && (
           <p className="rounded-2xl border border-dashed border-wii-line px-4 py-3 text-sm">
-            There is no public deployment for this project yet.
+            {t.noDeployment}
           </p>
         )}
       </aside>

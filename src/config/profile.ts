@@ -6,6 +6,8 @@
  * Deliberately not published: phone number, age, and driving licence, which appear on the CV
  * but are private details. Add them here only if they should be public.
  */
+import type { Locale } from "@/i18n/config";
+
 export interface ProfileLink {
   label: string;
   href: string;
@@ -147,6 +149,102 @@ export const profile: Profile = {
     { label: "Previous portfolio", href: "https://ipandragoni.github.io/portfolio/", kind: "website" },
   ],
 };
+
+/**
+ * The French version, worded as on the original (French) CV. Language-neutral details (name,
+ * email, links, technologies) are shared with the English profile above.
+ */
+const profileFr: Profile = {
+  ...profile,
+  role: "Développeur full-stack",
+  location: "Montpellier, France",
+  availability: "À la recherche d'une opportunité sur Montpellier et sa région.",
+  bio: [
+    "Développeur full-stack avec plus de 3 ans d'expérience en alternance dans l'industrie des éditeurs de logiciels, j'ai travaillé sur une large gamme de projets.",
+    "Maîtrisant plusieurs langages de programmation et frameworks, j'ai une solide expérience dans l'analyse des besoins des utilisateurs, la conception de solutions logicielles robustes et la gestion efficace des projets de développement.",
+  ],
+  experience: [
+    {
+      ...profile.experience[0],
+      role: "Développeur junior",
+      type: "Contrat en alternance",
+      start: "août 2023",
+      end: "sept. 2026",
+      highlights: [
+        "Développement et maintenance de logiciels complexes de gestion de bibliothèque (SIGB et portail).",
+        "Analyse des besoins clients, étude de la faisabilité de leurs demandes et rédaction de cahiers des charges.",
+      ],
+      keyProjects: [
+        "Migration complète d'un MVC PHP vers Symfony afin de moderniser le SIGB et de préparer une refonte du frontend.",
+        "Contribution et intégration d'un projet open source de gestion de planning (Planno) dans le SIGB.",
+      ],
+    },
+    {
+      ...profile.experience[1],
+      role: "Développeur junior",
+      type: "Stage",
+      start: "mars 2023",
+      end: "juin 2023",
+      highlights: [
+        "Développement d'un outil de gestion PHP permettant la visualisation et le traitement de missions.",
+        "Optimisation des performances de sites WordPress.",
+      ],
+    },
+  ],
+  studyProjects: [
+    {
+      ...profile.studyProjects[0],
+      title: "Hackathon ESGI × Groupe Michelin",
+      date: "juin 2026",
+      highlights: [
+        "Conception d'une application mobile de fidélisation connectée (Strava, gamification, dashboard 3D du vélo, suivi intelligent des pneus) pour renforcer la visibilité et les ventes de la gamme vélo.",
+      ],
+    },
+    {
+      ...profile.studyProjects[1],
+      title: "Création d'une formation SSO avec Java Spring Boot",
+      date: "sept. – déc. 2025",
+      highlights: [
+        "Conception et rédaction d'un cours complet (~10 h) sur la mise en place d'un système Single Sign-On (SSO).",
+        "Vulgarisation de concepts complexes : authentification, sessions, tokens, architecture backend.",
+      ],
+    },
+  ],
+  education: [
+    { period: "2024 – 2026", degree: "Mastère Ingénierie du Web", school: "ESGI Lyon" },
+    { period: "2021 – 2024", degree: "BUT Informatique", school: "IUT de Valence" },
+    { period: "2021", degree: "Baccalauréat général", school: "Lycée Marie Pila, Carpentras", detail: "Mention Bien" },
+  ],
+  skills: [
+    { group: "Backend", items: ["Spring", "Symfony", "NestJS", "Node.js"] },
+    { group: "Frontend", items: ["Next.js", "React", "Angular", "ExtJS"] },
+    { group: "Mobile", items: ["Flutter"] },
+    { group: "Langages", items: ["TypeScript", "JavaScript", "PHP", "Java", "Dart"] },
+    { group: "Bases de données", items: ["MySQL", "PostgreSQL", "Firebase"] },
+    { group: "DevOps & outils", items: ["Docker", "Git", "CI/CD", "Méthodologie Agile", "Figma", "JetBrains"] },
+    { group: "Concepts", items: ["API REST", "Auth / SSO", "WebSockets", "Clean Architecture"] },
+  ],
+  languages: [
+    { language: "Français", level: "Langue maternelle" },
+    { language: "Anglais", level: "Niveau B2 (TOEIC : 900/990)" },
+  ],
+  interests: [
+    { topic: "Musique", detail: "Guitare et piano (pratique en groupe)" },
+    { topic: "Sport", detail: "Tennis, musculation, course, randonnée" },
+    { topic: "Automobile", detail: "Simulation et sport automobile" },
+  ],
+  links: [
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/mathys-farineau/", kind: "linkedin" },
+    { label: "Ancien portfolio", href: "https://ipandragoni.github.io/portfolio/", kind: "website" },
+  ],
+};
+
+const PROFILES: Record<Locale, Profile> = { en: profile, fr: profileFr };
+
+/** The profile in a given language. */
+export function getProfile(locale: Locale = "en"): Profile {
+  return PROFILES[locale];
+}
 
 export function displayName(): string {
   return profile.name.trim() || "Portfolio";

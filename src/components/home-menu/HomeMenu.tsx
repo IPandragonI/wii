@@ -1,10 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { House, Minus, Music, Plus, RotateCcw, Volume2 } from "lucide-react";
+import { Globe, House, Minus, Music, Plus, RotateCcw, Volume2 } from "lucide-react";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { Switch } from "@/components/ui/Switch";
+import { LOCALES, localePath, parseLocalePath, type Locale } from "@/i18n/config";
+import { rememberLocale, useCurrentLocale } from "@/i18n/client";
+import { messagesFor, type Messages } from "@/i18n/messages";
 import { closeHomeMenu, useHomeMenu } from "@/lib/home-menu";
 import { MAX_VOLUME, setPreferences, usePreferences, type Preferences } from "@/lib/preferences";
 import { useScreenNavigation } from "@/lib/screen-transition";
@@ -22,7 +25,18 @@ export function HomeMenu() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [visible, setVisible] = useState(false);
   const titleId = useId();
-  const { returnToMenu } = useScreenNavigation();
+  const { returnToMenu, enterChannel } = useScreenNavigation();
+  const locale = useCurrentLocale();
+  const t = messagesFor(locale);
+
+  /** Moves to the same page in the other language, remembering the choice. */
+  const switchLanguage = (target: Locale) => {
+    if (target === locale) return;
+    rememberLocale(target);
+    closeHomeMenu();
+    const { path } = parseLocalePath(window.location.pathname);
+    void enterChannel(localePath(target, path));
+  };
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -68,7 +82,7 @@ export function HomeMenu() {
               transition={{ duration: 0.28, ease: EASE }}
             >
               <h2 id={titleId} className="text-2xl tracking-wide sm:text-3xl">
-                HOME Menu
+                {t.homeMenu.title}
               </h2>
               <button
                 type="button"
@@ -78,7 +92,7 @@ export function HomeMenu() {
                 className="flex h-12 items-center gap-2 rounded-full border-2 border-white/25 px-4 font-bold transition-colors hover:border-wii-cyan hover:text-wii-cyan focus-visible:border-wii-cyan"
               >
                 <House aria-hidden="true" size={20} strokeWidth={3} />
-                Close
+                {t.homeMenu.close}
               </button>
             </motion.header>
 
@@ -88,10 +102,10 @@ export function HomeMenu() {
               transition={{ duration: 0.24, ease: EASE, delay: 0.04 }}
             >
               <HomeButton onClick={goToMenu} icon={<House aria-hidden="true" size={28} />}>
-                {inChannel ? "Menu" : "Back to Menu"}
+                {inChannel ? t.homeMenu.menuInChannel : t.homeMenu.menuFromMenu}
               </HomeButton>
               <HomeButton onClick={() => window.location.reload()} icon={<RotateCcw aria-hidden="true" size={28} />}>
-                Reset
+                {t.homeMenu.reset}
               </HomeButton>
             </motion.div>
 
@@ -100,7 +114,7 @@ export function HomeMenu() {
               variants={{ closed: { y: "100%" }, open: { y: 0 } }}
               transition={{ duration: 0.28, ease: EASE }}
             >
-              <HomeSettings />
+              <HomeSettings t={t} locale={locale} onLanguage={switchLanguage} />
             </motion.footer>
           </motion.div>
         )}
@@ -123,7 +137,9 @@ function HomeButton({ children, icon, onClick }: { children: ReactNode; icon: Re
   );
 }
 
-function HomeSettings() {
+const LANGUAGE_NAMES: Record<Locale, string> = { en: "English", fr: "Français" };
+
+function HomeSettings({ t, locale, onLanguage }: { t: Messages; locale: Locale; onLanguage: (locale: Locale) => void }) {
   const preferences = usePreferences();
   const update = (change: Partial<Preferences>) => {
     setPreferences(change);
@@ -132,10 +148,10 @@ function HomeSettings() {
 
   return (
     <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-8 gap-y-4">
-      <div className="flex items-center gap-3" role="group" aria-label="Speaker volume">
+      <div className="flex items-center gap-3" role="group" aria-label={t.homeMenu.volume}>
         <Volume2 aria-hidden="true" size={22} className="text-white/70" />
         <RoundIconButton
-          label="Lower volume"
+          label={t.homeMenu.lowerVolume}
           disabled={preferences.volume === 0}
           onClick={() => update({ volume: preferences.volume - 1 })}
         >
@@ -151,10 +167,10 @@ function HomeSettings() {
           ))}
         </div>
         <span className="sr-only" aria-live="polite">
-          Volume {preferences.volume} of {MAX_VOLUME}
+          {t.homeMenu.volumeStatus(preferences.volume, MAX_VOLUME)}
         </span>
         <RoundIconButton
-          label="Raise volume"
+          label={t.homeMenu.raiseVolume}
           disabled={preferences.volume === MAX_VOLUME}
           onClick={() => update({ volume: preferences.volume + 1 })}
         >
@@ -163,22 +179,40 @@ function HomeSettings() {
       </div>
 
       <Switch
-        label="Music"
+        label={t.homeMenu.music}
         icon={<Music aria-hidden="true" size={16} />}
         checked={preferences.music}
         onChange={(music) => update({ music })}
       />
-      <Switch label="Sound effects" checked={preferences.sound} onChange={(sound) => update({ sound })} />
+      <Switch label={t.homeMenu.soundEffects} checked={preferences.sound} onChange={(sound) => update({ sound })} />
       <Switch
-        label="Reduced motion"
+        label={t.homeMenu.reducedMotion}
         checked={preferences.motion === "reduced"}
         onChange={(reduced) => update({ motion: reduced ? "reduced" : "system" })}
       />
       <Switch
-        label="Hand pointer"
+        label={t.homeMenu.handPointer}
         checked={preferences.cursor === "hand"}
         onChange={(hand) => update({ cursor: hand ? "hand" : "system" })}
       />
+
+      <div className="flex items-center gap-2" role="group" aria-label={t.homeMenu.language}>
+        <Globe aria-hidden="true" size={18} className="text-white/70" />
+        <div className="flex rounded-full border-2 border-white/25 p-1">
+          {LOCALES.map((option) => (
+            <button
+              key={option}
+              type="button"
+              lang={option}
+              aria-pressed={option === locale}
+              onClick={() => onLanguage(option)}
+              className="rounded-full px-3 py-1.5 text-sm font-bold transition-colors hover:text-wii-cyan aria-pressed:bg-wii-cyan aria-pressed:text-white"
+            >
+              {LANGUAGE_NAMES[option]}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

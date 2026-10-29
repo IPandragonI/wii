@@ -7,6 +7,7 @@ import { CHANNELS_PER_PAGE } from "@/config/menu";
 import { ChannelPreview, ZOOM_IN_SECONDS, ZOOM_OUT_SECONDS } from "@/components/wii-menu/ChannelPreview";
 import { EmptyChannel, WiiChannel } from "@/components/wii-menu/WiiChannel";
 import { WiiBottomBar } from "@/components/wii-menu/WiiBottomBar";
+import { useMessages } from "@/i18n/client";
 import type { MenuChannel } from "@/lib/menu";
 import { revealScreen } from "@/lib/screen-transition";
 import { playSound, setMusic } from "@/lib/sound";
@@ -59,6 +60,7 @@ export function nextChannelIndex(index: number, key: string, count: number, colu
 }
 
 export function WiiMenu({ channels, heading }: { channels: MenuChannel[]; heading: string }) {
+  const t = useMessages();
   const reduceMotion = useReducedMotion();
   const rootRef = useRef<HTMLDivElement>(null);
   const [scope, animate] = useAnimate<HTMLDivElement>();
@@ -172,7 +174,7 @@ export function WiiMenu({ channels, heading }: { channels: MenuChannel[]; headin
         <h1 className="sr-only">{heading}</h1>
         <div ref={scope} className="relative flex flex-1 items-center justify-center px-3 pt-4 sm:px-14 sm:pt-6">
           <section
-            aria-label="Channels"
+            aria-label={t.common.channels}
             onKeyDown={onKeyDown}
             className="w-full overflow-clip p-1 sm:w-[min(100%,calc((100dvh-172px)*1.7))] sm:p-2"
           >
@@ -183,7 +185,7 @@ export function WiiMenu({ channels, heading }: { channels: MenuChannel[]; headin
               {pages.map((pageChannels, pageIndex) => (
                 <ul
                   key={pageIndex}
-                  aria-label={pages.length > 1 ? `Page ${pageIndex + 1} of ${pages.length}` : undefined}
+                  aria-label={pages.length > 1 ? t.common.pageOf(pageIndex + 1, pages.length) : undefined}
                   className="grid w-full shrink-0 grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-x-[2.2%] sm:gap-y-[clamp(10px,2.6vh,24px)] sm:px-1"
                 >
                   {pageChannels.map((channel) => (
@@ -222,13 +224,14 @@ export function WiiMenu({ channels, heading }: { channels: MenuChannel[]; headin
 
 /** Blue page-turn arrows at the screen edges, shown only when there is another page. */
 function PageArrow({ direction, hidden, onClick }: { direction: "left" | "right"; hidden: boolean; onClick: () => void }) {
+  const t = useMessages();
   return (
     <button
       type="button"
       onClick={onClick}
       onPointerEnter={() => playSound("buttonHover")}
       tabIndex={-1}
-      aria-label={direction === "left" ? "Previous page" : "Next page"}
+      aria-label={direction === "left" ? t.common.previousPage : t.common.nextPage}
       className={`absolute top-1/2 hidden h-16 w-12 -translate-y-1/2 items-center justify-center transition-[opacity,scale] hover:scale-110 sm:flex ${
         direction === "left" ? "left-1" : "right-1"
       } ${hidden ? "pointer-events-none opacity-0" : "opacity-100"}`}

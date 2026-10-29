@@ -397,3 +397,10 @@ html[data-motion="reduced"] .mii-breathe {
 }
 @keyframes wii-letter { 0%, 20% { transform: translateY(22%); } 45%, 75% { transform: translateY(-14%); } 100% { transform: translateY(22%); } }
 @keyframes wii-notify { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+/* Tiles scrolled out of view pause their banner animations (see src/lib/offscreen.ts). */
+[data-offscreen] *,
+[data-offscreen] *::before,
+[data-offscreen] *::after {
+  animation-play-state: paused !important;
+}

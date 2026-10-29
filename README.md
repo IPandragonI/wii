@@ -91,7 +91,7 @@ Vercel REST ─┘    src/lib/github.ts, vercel.ts        └─ /projects/[slug
    3. An exact name match, only for Vercel projects with no Git link.
 
    If several projects tie at one level, the repository is left **unmatched** and a log message asks for an explicit `vercelProjectId`. A Vercel project claimed by an override is never auto-matched to another repository.
-4. **Production URL**: only deployments with `target: "production"` and `readyState: "READY"` count. Previews, building, queued, failed, and canceled deployments are never offered. The link is a production **domain** (custom domain first, apex before `www`, else the shortest `*.vercel.app`), never a per-deployment or branch URL. If a newer production build is in progress, the last ready one is still used. Fallbacks: the override's `productionUrl`, then the repository's GitHub "website" field. With none of these, there is no Launch button and the status reads "In development".
+4. **Production URL**: only deployments with `target: "production"` and `readyState: "READY"` count. Previews, building, queued, failed, and canceled deployments are never offered. The link is a production **domain** (custom domain first, apex before `www`, else the shortest `*.vercel.app`), never a per-deployment or branch URL. If a newer production build is in progress, the last ready one is still used. Fallbacks: the override's `productionUrl`, then the repository's GitHub "website" field. With none of these, there is no Launch button, and Start on the menu opens the project's internal page instead (a repository URL is never used as a deployment URL).
 5. **Slugs** come from the override or repository name, are deduplicated deterministically, and IDs are `gh-<repositoryId>`, so they are stable across renames of display titles.
 
 ### Caching (≈30 minutes)
@@ -121,17 +121,21 @@ Vercel REST ─┘    src/lib/github.ts, vercel.ts        └─ /projects/[slug
 
 ```
 src/
-├── app/                  routes: menu, projects/[slug], github, about, contact, api/*, metadata
+├── app/                  routes: menu, projects/[slug], github, about, linkedin, contact, api/*, metadata
+│                         (thin files; French twins live under app/fr/)
+├── views/                the pages themselves, one per route, rendered by both languages (locale prop)
+├── i18n/                 config.ts (locales, localePath, hreflang), messages.ts (EN/FR text), client.tsx (LocaleProvider)
 ├── components/
 │   ├── wii-menu/         WiiMenu (pages, keyboard nav, zooms), ChannelPreview (Menu/Start), WiiChannel, WiiBottomBar, WiiClock
 │   ├── channel/          ChannelScreen: the inside of a channel (title band, console bar, fades, Esc)
 │   ├── home-menu/        HomeMenu overlay with the settings
 │   ├── project/          ProjectDetails, ProjectPreview, ProjectActions
 │   ├── about/            MiiStage: the waving 3D character (three.js, loaded only on About)
-│   └── ui/               ChannelArt (banners + animated scenes), MotionGate, MiiAvatar (2D fallback), Switch, ChannelIcon, ConsoleBar, …
+│   └── ui/               ChannelArt + scenes/ (one animated scene per file), MotionGate, MiiAvatar (2D fallback), Switch, ChannelIcon, ConsoleBar, …
 ├── config/               projects.ts (overrides + rules), menu.ts, profile.ts, site.ts, audio.ts (optional audio files)
 ├── lib/                  github.ts, vercel.ts, project-normalizer.ts, project-sync.ts, portfolio.ts,
-│                         site-probe.ts (embeddability + site visuals), live-preview.ts,
+│                         site-probe.ts (reads a deployed site's title, description, colour and image to pick a theme),
+│                         offscreen.ts (pauses animations that are scrolled out of view), og-card.tsx (social cards),
 │                         audio/ (engine, synthesized effects, music), screen-transition.ts, preferences.ts, …
 └── types/                project.ts (normalized), providers.ts, config.ts
 ```
@@ -199,10 +203,22 @@ The About channel shows a 3D character who waves when the channel opens, every f
 
 - Real links for every channel (middle-click and new tab skip the preview and open the channel directly). Arrow keys move between channels across pages, Home/End jump to the ends, Enter opens the preview, Escape closes it or leaves a channel.
 - The preview and HOME Menu are modal: focus moves into them and stays there until they close. Focus returns to the opened channel when you come back.
-- Status is always shown as text and icon, never color alone.
+- Channels carry no status badges; whether a project is deployed only decides where Start leads (the live site in a new tab, or its internal page).
 - `prefers-reduced-motion` (or "Reduced motion" in the HOME Menu) turns the zooms and fades into instant changes and stops the ambient banner motion. The site works fully without animation.
 - The hand pointer only applies to mouse-like pointers and can be turned off.
 - Interface chrome (the menu, channel tiles, bars, headers, the preview, and the HOME Menu) can't be text-selected with the mouse, like a console. Channel content (descriptions, bio, contact details) stays selectable and copyable, and clicking, dragging, touch, and keyboard navigation are unaffected.
+
+## Languages (English and French)
+
+- English keeps the original URLs (`/about`); French lives under `/fr` (`/fr/about`). Every page is prerendered in both and links to its translation with `hreflang`; the sitemap lists both.
+- Switch language in the HOME Menu (Language). The choice is remembered in the browser and applies when you open the menu at `/`.
+- Interface text is in `src/i18n/messages.ts` (TypeScript requires French to provide every key). Personal content is in `src/config/profile.ts`: `profile` (English) and `profileFr`, which shares contact details and links. Project descriptions come from GitHub and your overrides, so they stay in the language they were written in.
+
+## Social previews and security headers
+
+- Each page has an Open Graph image built from the same animated scene as its channel (`assets/og-scenes/*.jpg`, rendered once and committed), with the title on a Wii-style frame.
+- A Content-Security-Policy restricts scripts, styles, fonts, media and connections to the site itself (images may come from HTTPS sources). Inline scripts are allowed because Next.js needs them; tighten with nonces if you add third-party scripts. Vercel's preview toolbar may be blocked on preview deployments.
+- Animations pause automatically while scrolled out of view.
 
 ## Known limitations
 

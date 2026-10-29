@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import type { FocusEvent, MouseEvent } from "react";
+import { useRef, type FocusEvent, type MouseEvent } from "react";
 
 import { ChannelArt } from "@/components/ui/ChannelArt";
+import { useMessages } from "@/i18n/client";
 import type { MenuChannel } from "@/lib/menu";
+import { usePauseWhenOffscreen } from "@/lib/offscreen";
 import { useScreenNavigation } from "@/lib/screen-transition";
 import { playSound } from "@/lib/sound";
 
@@ -20,6 +22,9 @@ interface WiiChannelProps {
  */
 export function WiiChannel({ channel, onOpen, onFocus }: WiiChannelProps) {
   const { enterChannel } = useScreenNavigation();
+  const artRef = useRef<HTMLSpanElement>(null);
+  const t = useMessages();
+  usePauseWhenOffscreen(artRef);
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     // Let the browser handle new-tab and download gestures normally.
@@ -46,7 +51,7 @@ export function WiiChannel({ channel, onOpen, onFocus }: WiiChannelProps) {
         }}
         className="wii-channel group relative block aspect-[48/35] rounded-[18px] border-[3px] border-[#c9cdd1] bg-gradient-to-b from-white to-[#eef0f2] p-[3px] shadow-channel outline-none transition-transform duration-150 ease-out hover:scale-[1.02] focus-visible:scale-[1.02] active:scale-[0.985] motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
       >
-        <span data-art className="relative block h-full w-full overflow-hidden rounded-[13px] [contain:paint]">
+        <span ref={artRef} data-art className="relative block h-full w-full overflow-hidden rounded-[13px] [contain:paint]">
           <ChannelArt
             title={channel.title}
             subtitle={channel.subtitle}
@@ -55,6 +60,7 @@ export function WiiChannel({ channel, onOpen, onFocus }: WiiChannelProps) {
             accent={channel.accent}
             banner={channel.banner}
             tint={channel.tint}
+            greeting={t.common.hello}
           />
         </span>
       </Link>

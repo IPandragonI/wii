@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useSyncExternalStore } from "react";
 
+import { localePath } from "@/i18n/config";
+import { getCurrentLocale } from "@/i18n/client";
 import { getPreferences } from "@/lib/preferences";
 import { playSound } from "@/lib/sound";
 
@@ -71,9 +73,10 @@ export function useScreenNavigation() {
 
   const returnToMenu = useCallback(async () => {
     playSound("back");
-    router.prefetch("/");
+    const menu = localePath(getCurrentLocale(), "/");
+    router.prefetch(menu);
     await coverScreen();
-    router.push("/");
+    router.push(menu);
   }, [router]);
 
   return { enterChannel, returnToMenu };
