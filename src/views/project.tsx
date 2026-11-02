@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ChannelScreen } from "@/components/channel/ChannelScreen";
 import { ProjectActions } from "@/components/project/ProjectActions";
 import { ProjectDetails } from "@/components/project/ProjectDetails";
+import { ProjectNav } from "@/components/project/ProjectNav";
 import { SampleDataNotice } from "@/components/ui/SampleDataNotice";
 import { LocaleProvider } from "@/i18n/client";
 import { alternatesFor, localePath, type Locale } from "@/i18n/config";
@@ -40,9 +41,18 @@ export async function ProjectView({ locale, slug }: { locale: Locale; slug: stri
   const [project, data] = await Promise.all([getProjectBySlug(slug), getPortfolio()]);
   if (!project) notFound();
 
+  // Browse in menu order: the featured projects (or all of them, when none are featured).
+  const featured = data.projects.filter((candidate) => candidate.featured);
+  const order = featured.some((candidate) => candidate.id === project.id) ? featured : data.projects;
+  const at = order.findIndex((candidate) => candidate.id === project.id);
+  const link = (candidate?: (typeof order)[number]) =>
+    candidate && { name: candidate.name, href: localePath(locale, `/projects/${candidate.slug}`) };
+
   return (
     <LocaleProvider locale={locale}>
+      {/* Keyed by slug so each project mounts afresh: the fade-in and focus run on every project. */}
       <ChannelScreen
+        key={project.slug}
         title={project.name}
         icon={project.channelIcon}
         category={project.category}
@@ -56,6 +66,12 @@ export async function ProjectView({ locale, slug }: { locale: Locale; slug: stri
           </div>
         )}
         <ProjectDetails project={project} locale={locale} />
+        <ProjectNav
+          previous={link(order[at - 1])}
+          next={link(order[at + 1])}
+          previousLabel={messagesFor(locale).project.previousProject}
+          nextLabel={messagesFor(locale).project.nextProject}
+        />
       </ChannelScreen>
     </LocaleProvider>
   );

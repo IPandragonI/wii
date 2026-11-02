@@ -26,9 +26,10 @@ export function ProjectDetails({ project, locale = DEFAULT_LOCALE }: { project: 
   ].filter((fact) => fact.value !== undefined);
 
   return (
+    <div className="space-y-6">
+    <ProjectPreview project={project} locale={locale} />
     <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
       <div className="space-y-6">
-        <ProjectPreview project={project} locale={locale} />
         {(project.description || project.details) && (
           <Section title={t.about}>
             {project.description && <p className="text-lg leading-relaxed text-wii-ink-strong">{project.description}</p>}
@@ -92,6 +93,7 @@ export function ProjectDetails({ project, locale = DEFAULT_LOCALE }: { project: 
           </p>
         )}
       </aside>
+    </div>
     </div>
   );
 }

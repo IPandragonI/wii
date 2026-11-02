@@ -20,6 +20,13 @@ export const systemChannels: Record<SystemChannelId, SystemChannel> = {
     tagline: "Everything I've built",
     href: "/projects",
     icon: "projects",
+  },  
+  about: {
+    id: "about",
+    title: "About Me",
+    tagline: "Who's behind this",
+    href: "/about",
+    icon: "about",
   },
   github: {
     id: "github",
@@ -27,13 +34,6 @@ export const systemChannels: Record<SystemChannelId, SystemChannel> = {
     tagline: "Recent activity",
     href: "/github",
     icon: "github",
-  },
-  about: {
-    id: "about",
-    title: "About Me",
-    tagline: "Who's behind this",
-    href: "/about",
-    icon: "about",
   },
   linkedin: {
     id: "linkedin",
@@ -54,8 +54,8 @@ export const systemChannels: Record<SystemChannelId, SystemChannel> = {
 export const menuLayout: (SystemChannelId | "featured")[] = [
   "featured",
   "projects",
-  "github",
   "about",
+  "github",
   "linkedin",
   "contact",
 ];

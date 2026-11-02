@@ -45,8 +45,8 @@ const en = {
   },
   channels: {
     projects: { title: "All Projects", tagline: "Everything I've built" },
-    github: { title: "GitHub", tagline: "Recent activity" },
     about: { title: "About Me", tagline: "Who's behind this" },
+    github: { title: "GitHub", tagline: "Recent activity" },
     linkedin: { title: "LinkedIn", tagline: "Professional profile" },
     contact: { title: "Contact", tagline: "Say hello" },
   },
@@ -75,6 +75,8 @@ const en = {
     launchProject: "Launch project",
     opensGitHub: "(opens GitHub in a new tab)",
     preview: (name: string) => `${name} preview`,
+    previousProject: "Previous project",
+    nextProject: "Next project",
     notFound: "Channel not found",
   },
   github: {
@@ -228,6 +230,8 @@ const fr: Messages = {
     launchProject: "Lancer le projet",
     opensGitHub: "(ouvre GitHub dans un nouvel onglet)",
     preview: (name) => `Aperçu de ${name}`,
+    previousProject: "Projet précédent",
+    nextProject: "Projet suivant",
     notFound: "Chaîne introuvable",
   },
   github: {
