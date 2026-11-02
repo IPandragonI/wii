@@ -28,8 +28,11 @@ With no environment variables the site runs on a small **sample dataset** (`fall
 | --- | --- | --- |
 | `GITHUB_USERNAME` | For live data | Account whose **public** repositories are listed |
 | `GITHUB_TOKEN` | No | Raises the GitHub rate limit (60 → 5,000/h). A fine-grained token with no extra permissions is enough. If it is rejected, the sync retries without it |
-| `VERCEL_TOKEN` | For Vercel data | Read access to your Vercel projects (deployments, domains) |
-| `VERCEL_TEAM_ID` | No | Only for team-owned Vercel projects |
+| `VERCEL_TOKEN` | **Yes, on Vercel too** | Read access to your Vercel projects. Without it, deployed project channels have no launch link (see *Deployment links* below) |
+| `VERCEL_TEAM_ID` | If your projects are in a team | `team_…` ID. Required when the projects belong to a Vercel team |
+| `RESEND_API_KEY` | For the contact form | Server-side key from [resend.com](https://resend.com). Without it the form reports that delivery is unavailable |
+| `CONTACT_TO_EMAIL` | No | Where messages are delivered. Defaults to the email in `src/config/profile.ts` |
+| `CONTACT_FROM_EMAIL` | No | Sender, e.g. `Portfolio <contact@your-domain.com>`. Defaults to Resend's `onboarding@resend.dev`, which can only deliver to your own Resend account address until you verify a domain |
 | `NEXT_PUBLIC_SITE_URL` | Recommended | Canonical URL for metadata, Open Graph, and the sitemap. Falls back to Vercel's production domain |
 | `REVALIDATE_SECRET` | No | Enables the protected refresh endpoint (min. 16 characters) |
 
@@ -60,7 +63,7 @@ export const projectOverrides: ProjectOverride[] = [
 ];
 ```
 
-> The four overrides that ship with the repo (`islebound`, `kart-racing`, `checkmate`, `carspotter`) use **guessed repository names**. Rename them to your real repository names. Until they match, they are skipped and reported in the server log, and no channel is created for them.
+> The shipped overrides are pinned by stable `repositoryId` and `vercelProjectId`, both checked against the GitHub and Vercel APIs. The example above is only a template.
 
 **Precedence:** manual override → GitHub metadata → safe defaults.
 
@@ -73,6 +76,26 @@ export const projectOverrides: ProjectOverride[] = [
 - `recentLimit` (default 12) sizes the GitHub "recent" view. `menuFeaturedLimit` (default 6) caps project channels on the menu. With nothing featured, the most recently updated projects fill the menu.
 
 The menu order is in `src/config/menu.ts`. All personal information lives in **`src/config/profile.ts`**, taken from `cv.jpg`: name, title, location, introduction, experience, study projects, education, skills, languages, interests, email, and links. The About, Contact, and LinkedIn channels and the site metadata all read from it. The phone number, age, and driving licence on the CV are intentionally not published. The LinkedIn channel only appears when a `linkedin` link is configured there.
+
+## Deployment links
+
+A project's **Start** button opens its production site in a new tab, and only when a verified URL exists. Otherwise it opens the internal detail page. The URL is resolved in this order:
+
+1. `productionUrl` in `src/config/projects.ts` (a deliberate manual pin).
+2. The matched Vercel project's **production domains** (from Vercel's domains endpoint; branch domains, redirects and unverified domains are ignored), and only when it has a READY production deployment.
+3. The GitHub "website" field, **unless it is a `*.vercel.app` address**, which nothing keeps in sync with Vercel and which goes stale.
+
+Repositories are matched to Vercel projects by `vercelProjectId` (preferred), else by the project's Git link (repository ID), else by an identical name on a project with no Git link. An ambiguous or mismatched association is never guessed: the repository gets no URL and the server log says why. A pinned `vercelProjectId` that is linked to a different repository is refused.
+
+**Vercel setup:** add `VERCEL_TOKEN` (and `VERCEL_TEAM_ID` if the projects are in a team) to this project's **Environment Variables** in Vercel, for Production and Preview, then redeploy. A deployment cannot read its sibling projects' domains without a token.
+
+## Contact form
+
+`/contact` posts to `POST /api/contact`, which validates the message again on the server and sends it through [Resend](https://resend.com) with `fetch` (no SDK). The form reports success only after Resend accepts the message. Visitors' addresses go in `Reply-To`.
+
+Setup: create a Resend account and an API key, then set `RESEND_API_KEY` in Vercel (Production and Preview) and redeploy. Optionally set `CONTACT_TO_EMAIL` and `CONTACT_FROM_EMAIL`. With only an API key, Resend's `onboarding@resend.dev` sender delivers to the email address of your Resend account only; verify a domain to send from your own address.
+
+Spam protection: same-origin requests only, a hidden honeypot field, a minimum fill time, a body size cap, and an in-memory rate limit (3 messages per 10 minutes per IP, 40 per hour overall). On Vercel each serverless instance counts separately, so treat the limit as a speed bump; Resend's own limits are the backstop.
 
 ## How synchronization works
 

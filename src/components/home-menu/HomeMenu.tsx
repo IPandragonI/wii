@@ -11,7 +11,7 @@ import { messagesFor, type Messages } from "@/i18n/messages";
 import { closeHomeMenu, useHomeMenu } from "@/lib/home-menu";
 import { MAX_VOLUME, setPreferences, usePreferences, type Preferences } from "@/lib/preferences";
 import { useScreenNavigation } from "@/lib/screen-transition";
-import { playSound } from "@/lib/sound";
+import { playSound, useMusicStatus } from "@/lib/sound";
 
 const EASE = [0.25, 0.9, 0.3, 1] as const;
 
@@ -141,6 +141,7 @@ const LANGUAGE_NAMES: Record<Locale, string> = { en: "English", fr: "Français" 
 
 function HomeSettings({ t, locale, onLanguage }: { t: Messages; locale: Locale; onLanguage: (locale: Locale) => void }) {
   const preferences = usePreferences();
+  const musicStatus = useMusicStatus();
   const update = (change: Partial<Preferences>) => {
     setPreferences(change);
     playSound("toggle");
@@ -179,7 +180,7 @@ function HomeSettings({ t, locale, onLanguage }: { t: Messages; locale: Locale; 
       </div>
 
       <Switch
-        label={t.homeMenu.music}
+        label={musicStatus === "blocked" ? t.homeMenu.musicWaiting : t.homeMenu.music}
         icon={<Music aria-hidden="true" size={16} />}
         checked={preferences.music}
         onChange={(music) => update({ music })}

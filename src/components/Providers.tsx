@@ -1,12 +1,15 @@
 "use client";
 
+import { Volume2 } from "lucide-react";
 import { AnimatePresence, motion, MotionConfig } from "motion/react";
 import { useEffect, type ReactNode } from "react";
 
 import { HomeMenu } from "@/components/home-menu/HomeMenu";
 import { usePreferences } from "@/lib/preferences";
 import { FADE_SECONDS, useScreenCovered } from "@/lib/screen-transition";
-import { unlockAudio } from "@/lib/sound";
+import { useCurrentLocale } from "@/i18n/client";
+import { messagesFor } from "@/i18n/messages";
+import { initAudio, unlockAudio, useMusicStatus } from "@/lib/sound";
 
 /** The white veil shown while moving between the menu and a channel. */
 function ScreenFade() {
@@ -28,6 +31,28 @@ function ScreenFade() {
   );
 }
 
+/**
+ * Shown only while the music is switched on but the browser has not yet allowed audio. Any
+ * first tap or key press starts it, so this is a hint, not a required step; it vanishes
+ * the moment audio runs.
+ */
+function MusicHint() {
+  const status = useMusicStatus();
+  const text = messagesFor(useCurrentLocale()).common.startMusic;
+  if (status !== "blocked") return null;
+  return (
+    <button
+      type="button"
+      onClick={() => void unlockAudio()}
+      className="fixed right-3 top-3 z-30 flex min-h-11 items-center gap-2 rounded-full border-2 border-[#c9cdd1] bg-white/90 px-3 text-sm font-bold text-wii-ink shadow-channel backdrop-blur transition-colors hover:border-wii-cyan hover:text-wii-blue focus-visible:border-wii-cyan focus-visible:outline-none"
+    >
+      <Volume2 aria-hidden="true" size={18} className="text-wii-cyan motion-safe:animate-pulse" />
+      <span className="hidden sm:inline">{text}</span>
+      <span className="sr-only sm:hidden">{text}</span>
+    </button>
+  );
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   const { motion: motionPreference, cursor } = usePreferences();
 
@@ -36,22 +61,15 @@ export function Providers({ children }: { children: ReactNode }) {
     document.documentElement.dataset.cursor = cursor;
   }, [motionPreference, cursor]);
 
-  // The first real gesture unlocks audio; nothing can play before it.
-  useEffect(() => {
-    const unlock = () => void unlockAudio();
-    window.addEventListener("pointerdown", unlock, { once: true });
-    window.addEventListener("keydown", unlock, { once: true });
-    return () => {
-      window.removeEventListener("pointerdown", unlock);
-      window.removeEventListener("keydown", unlock);
-    };
-  }, []);
+  // Try to start audio right away; if the browser blocks it, the first gesture does (see initAudio).
+  useEffect(() => initAudio(), []);
 
   return (
     <MotionConfig reducedMotion={motionPreference === "reduced" ? "always" : "user"}>
       {children}
       <HomeMenu />
       <ScreenFade />
+      <MusicHint />
     </MotionConfig>
   );
 }

@@ -14,6 +14,8 @@ import type {
 
 const API_ROOT = "https://api.vercel.com";
 const MAX_PAGES = 10;
+/** Upper bound on per-project domain lookups per sync. */
+const MAX_DOMAIN_LOOKUPS = 24;
 
 export interface VercelClientOptions {
   token: string;
@@ -150,7 +152,10 @@ export function selectProduction(project: VercelProjectInfo): VercelProductionSu
   const ready = production.find((deployment) => deployment.readyState === "READY");
   if (!ready) return { latestProductionState };
 
-  const candidates = [...project.productionDomains, ...ready.aliases.map((alias) => alias.toLowerCase())].filter(
+  // The project's own production domains (from the domains endpoint) are authoritative. Only
+  // when none are known do we fall back to the aliases of the ready production deployment.
+  const fromDeployment = ready.aliases.map((alias) => alias.toLowerCase());
+  const candidates = (project.productionDomains.length ? project.productionDomains : fromDeployment).filter(
     (domain) => isValidHostname(domain) && !isBranchAlias(domain),
   );
   const domain = [...new Set(candidates)].sort(compareDomains)[0];
@@ -160,6 +165,59 @@ export function selectProduction(project: VercelProjectInfo): VercelProductionSu
     lastDeploymentAt: new Date(ready.createdAt).toISOString(),
     latestProductionState,
   };
+}
+
+const domainListSchema = z.object({
+  domains: z.array(
+    z.object({
+      name: z.string(),
+      redirect: z.string().nullable().optional(),
+      gitBranch: z.string().nullable().optional(),
+      verified: z.boolean().optional(),
+    }),
+  ),
+});
+
+/**
+ * Production domains are the ones attached to the project that are verified, not tied to a
+ * Git branch (those serve previews), and not redirects to another domain.
+ */
+export function parseProductionDomains(body: unknown): string[] | null {
+  const parsed = domainListSchema.safeParse(body);
+  if (!parsed.success) return null;
+  const names = parsed.data.domains
+    .filter((domain) => !domain.redirect && !domain.gitBranch && domain.verified !== false)
+    .map((domain) => domain.name.toLowerCase());
+  return [...new Set(names)];
+}
+
+/**
+ * Asks Vercel which domains each project actually serves production on. The project list does
+ * not include them, and guessing from deployment aliases is fragile. A failed lookup leaves
+ * that project unchanged (it then uses its production deployment's aliases).
+ */
+export async function withProductionDomains(
+  projects: VercelProjectInfo[],
+  options: VercelClientOptions,
+): Promise<VercelProjectInfo[]> {
+  const lookups = new Set(projects.filter((project) => project.deployments.length).slice(0, MAX_DOMAIN_LOOKUPS));
+  return Promise.all(
+    projects.map(async (project) => {
+      if (!lookups.has(project)) return project;
+      const params = new URLSearchParams({ limit: "100" });
+      if (options.teamId) params.set("teamId", options.teamId);
+      const result = await getJson({
+        url: `${API_ROOT}/v9/projects/${encodeURIComponent(project.id)}/domains?${params}`,
+        headers: { Authorization: `Bearer ${options.token}` },
+        revalidate: options.revalidate,
+        tags: options.tags,
+        fetchImpl: options.fetchImpl,
+      });
+      const domains = result.ok ? parseProductionDomains(result.data.body) : null;
+      if (!domains?.length) return project;
+      return { ...project, productionDomains: [...new Set([...domains, ...project.productionDomains])] };
+    }),
+  );
 }
 
 /** Lists all projects visible to the token (scoped to `teamId` when provided). */

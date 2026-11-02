@@ -1,5 +1,5 @@
 import { menuLayout, systemChannels, type SystemChannelId } from "@/config/menu";
-import { linkedinUrl } from "@/config/profile";
+import { githubUrl, linkedinUrl } from "@/config/profile";
 import { DEFAULT_LOCALE, localePath, type Locale } from "@/i18n/config";
 import { categoryLabel, messagesFor } from "@/i18n/messages";
 import { safeExternalUrl } from "@/lib/url";
@@ -60,6 +60,16 @@ export function launchUrlFor(productionUrl: string | undefined): string | undefi
   return url?.startsWith("https://") ? url : undefined;
 }
 
+/**
+ * System channels that are external profiles: Start opens the profile directly in a new tab
+ * instead of a page of ours. A missing or malformed URL yields no launch URL, so the channel
+ * never opens a wrong destination (GitHub then keeps its internal page).
+ */
+const EXTERNAL_PROFILES: Partial<Record<SystemChannelId, () => string | undefined>> = {
+  linkedin: linkedinUrl,
+  github: githubUrl,
+};
+
 /** System channels that only make sense when configured. */
 const SYSTEM_CHANNEL_ENABLED: Partial<Record<SystemChannelId, () => boolean>> = {
   linkedin: () => Boolean(linkedinUrl()),
@@ -94,6 +104,7 @@ export function buildMenuChannels(featured: PortfolioProject[], locale: Locale =
         href: localePath(locale, channel.href),
         icon: channel.icon,
         banner: channel.id,
+        launchUrl: launchUrlFor(EXTERNAL_PROFILES[channel.id]?.()),
         tint: SYSTEM_TINTS[channel.id] ?? "slate",
       },
     ];

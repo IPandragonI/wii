@@ -9,48 +9,68 @@ import type { DiscoveryRules, FallbackProject, ProjectOverride } from "@/types/c
  * is created for it. Prefer `repositoryId` (stable across renames) once you know it:
  * `curl https://api.github.com/repos/<user>/<repo> | grep '"id"'`.
  *
- * The repository names below are guesses. Rename them to match your GitHub repositories.
+ * Deployment links. Each repository below is pinned by its GitHub `repositoryId` and, when it
+ * is deployed on Vercel, by its `vercelProjectId` (`prj_...`). Both are stable identifiers
+ * (checked against the GitHub and Vercel APIs); names can change, IDs cannot. The production
+ * URL itself is then read from Vercel at sync time, so it follows domain changes. A project
+ * with no `vercelProjectId` and no `productionUrl` has no deployment and opens its detail page.
+ * To pin a URL by hand (no Vercel lookup at all), set `productionUrl`.
  */
 export const projectOverrides: ProjectOverride[] = [
   {
-    repositoryName: "checkout",
+    repositoryId: 1426707666,
+    repositoryName: "Checkout",
+    vercelProjectId: "prj_KsXuERfThA0r8Mnu6bsXw2Ws5Omq",
     title: "Checkout",
     channelIcon: "dart",
     featured: true,
     order: 1,
   },
   {
-    repositoryName: "karting",
+    repositoryId: 1433429338,
+    repositoryName: "Karting",
+    vercelProjectId: "prj_h8OkCbF9nDNrtyBcDFkA9rUfx2uj",
     title: "Karting",
     channelIcon: "kart",
     featured: true,
     order: 2,
-  }, {
-    repositoryName: "outpost",
+  },
+  {
+    repositoryId: 1431569754,
+    repositoryName: "Outpost",
+    vercelProjectId: "prj_Fgp0iNIrVaHhz6l24l80RBfcVsX9",
     title: "Outpost",
     channelIcon: "outpost",
     featured: true,
     order: 3,
   },
   {
-    repositoryName: "cherry",
+    repositoryId: 1428104371,
+    repositoryName: "Cherry",
+    vercelProjectId: "prj_SRFvwhawiga0wnh9Cx0gamuN8Aw1",
     title: "Cherry",
     channelIcon: "cherry",
     featured: true,
     order: 4,
-  }, {
-    repositoryName: "calandre",
+  },
+  {
+    repositoryId: 1432125260,
+    repositoryName: "Calandre",
+    vercelProjectId: "prj_CAwVIMA4IJNrlMecZfIYKzXbSCf6",
     title: "Calandre",
     channelIcon: "calandre",
     featured: true,
     order: 5,
-  }, {
-    repositoryName: "autonomous_vehicles",
+  },
+  {
+    // Not deployed on Vercel: no vercelProjectId, so it opens its detail page.
+    repositoryId: 1409005892,
+    repositoryName: "Autonomous_Vehicles",
     title: "Autonomous Vehicles",
     channelIcon: "autonomous",
     featured: true,
-    order: 5,
-  }
+    order: 6,
+  },
 ];
 
 export const discoveryRules: DiscoveryRules = {

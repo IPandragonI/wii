@@ -6,5 +6,5 @@ export const size = OG_SIZE;
 export const contentType = "image/png";
 
 export default function OpenGraphImage() {
-  return sceneOgImage({ scene: "projects", title: "Projects", subtitle: displayName() });
+  return sceneOgImage({ scene: "projects", title: "All Projects", subtitle: displayName() });
 }

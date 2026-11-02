@@ -16,7 +16,7 @@ export interface SystemChannel {
 export const systemChannels: Record<SystemChannelId, SystemChannel> = {
   projects: {
     id: "projects",
-    title: "Projects",
+    title: "All Projects",
     tagline: "Everything I've built",
     href: "/projects",
     icon: "projects",

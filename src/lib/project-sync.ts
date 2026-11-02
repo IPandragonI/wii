@@ -4,7 +4,7 @@ import { fetchPublicRepositories, fetchRepositoryLanguages, isValidGitHubUsernam
 import type { FetchLike } from "@/lib/http";
 import { bannerFromText, buildFallbackPortfolio, buildPortfolio, compareByRecency, decideVisibility, findOverride, indexOverrides } from "@/lib/project-normalizer";
 import { probeSite } from "@/lib/site-probe";
-import { fetchVercelProjects } from "@/lib/vercel";
+import { fetchVercelProjects, withProductionDomains } from "@/lib/vercel";
 import { PORTFOLIO_CACHE_TAG, SYNC_INTERVAL_SECONDS } from "@/config/site";
 import type { DiscoveryRules, FallbackProject, ProjectOverride } from "@/types/config";
 import type { PortfolioData, PortfolioProject, ProviderIssue } from "@/types/project";
@@ -123,8 +123,22 @@ export async function syncPortfolio(
   }
 
   let vercelProjects: VercelProjectInfo[] | null = null;
-  if (vercel?.ok) vercelProjects = vercel.data;
-  else if (vercel) issues.push({ provider: "vercel", message: vercel.error, transient: vercel.transient });
+  if (vercel?.ok && env.vercelToken) {
+    vercelProjects = await withProductionDomains(vercel.data, {
+      ...cache,
+      token: env.vercelToken,
+      teamId: env.vercelTeamId,
+    });
+  } else if (vercel) {
+    if (!vercel.ok) issues.push({ provider: "vercel", message: vercel.error, transient: vercel.transient });
+  } else {
+    issues.push({
+      provider: "vercel",
+      message:
+        "VERCEL_TOKEN is not set: deployment links are limited to explicit productionUrl overrides and non-vercel.app GitHub homepages",
+      transient: false,
+    });
+  }
 
   // Only curated repositories get the extra languages request; the rest use their primary language.
   const { index } = indexOverrides(config.overrides);

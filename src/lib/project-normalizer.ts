@@ -139,7 +139,14 @@ export function matchVercelProjects(
     const project =
       vercelProjects.find((candidate) => candidate.id === wanted) ??
       vercelProjects.find((candidate) => candidate.name === wanted);
-    if (project) {
+    if (project && project.link?.type === "github" && !linksTo(project, repository)) {
+      // A pinned ID must not hand this repository a project that Vercel deploys from another one.
+      issues.push({
+        provider: "matching",
+        message: `Vercel project "${project.name}" configured for ${repository.name} is linked to ${project.link.org}/${project.link.repo}; not matched`,
+        transient: false,
+      });
+    } else if (project) {
       matches.set(repository.id, project);
       claimed.add(project.id);
     } else {
@@ -277,6 +284,20 @@ function categoryFor(repository: GitHubRepository): string {
   return repository.topics.some((topic) => GAME_TOPICS.has(topic.toLowerCase())) ? "Game" : DEFAULT_CATEGORY;
 }
 
+/**
+ * The GitHub "website" field is free text that nothing keeps in sync with the deployment: here
+ * it still holds `*.vercel.app` names that Vercel has since replaced. A `*.vercel.app` homepage
+ * is therefore never trusted (Vercel is the source of truth for those, via the matched
+ * project); a homepage on any other host, such as a custom domain or GitHub Pages, is the
+ * owner's explicit statement and is kept.
+ */
+export function trustedHomepage(homepage: string | null): string | undefined {
+  const url = safeExternalUrl(homepage)?.replace(/^http:/, "https:");
+  if (!url) return undefined;
+  const host = new URL(url).hostname.toLowerCase();
+  return host === "vercel.app" || host.endsWith(".vercel.app") ? undefined : url;
+}
+
 export function normalizeRepositoryProject(
   repository: GitHubRepository,
   override: ProjectOverride | undefined,
@@ -287,7 +308,7 @@ export function normalizeRepositoryProject(
   const productionUrl =
     safeExternalUrl(override?.productionUrl) ??
     vercel?.productionUrl ??
-    safeExternalUrl(repository.homepage)?.replace(/^http:/, "https:");
+    trustedHomepage(repository.homepage);
 
   const status =
     override?.status ?? (repository.archived ? "archived" : productionUrl ? "production" : "development");

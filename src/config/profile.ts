@@ -146,6 +146,7 @@ export const profile: Profile = {
   email: "mathysf84@gmail.com",
   links: [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/mathys-farineau/", kind: "linkedin" },
+    { label: "GitHub", href: "https://github.com/IPandragonI", kind: "github" },
     { label: "Previous portfolio", href: "https://ipandragoni.github.io/portfolio/", kind: "website" },
   ],
 };
@@ -235,6 +236,7 @@ const profileFr: Profile = {
   ],
   links: [
     { label: "LinkedIn", href: "https://www.linkedin.com/in/mathys-farineau/", kind: "linkedin" },
+    { label: "GitHub", href: "https://github.com/IPandragonI", kind: "github" },
     { label: "Ancien portfolio", href: "https://ipandragoni.github.io/portfolio/", kind: "website" },
   ],
 };
@@ -253,4 +255,9 @@ export function displayName(): string {
 /** The LinkedIn profile URL, if one is configured. Used by the LinkedIn channel and Contact. */
 export function linkedinUrl(): string | undefined {
   return profile.links.find((link) => link.kind === "linkedin")?.href;
+}
+
+/** The GitHub profile URL, if one is configured. Opened directly by the GitHub channel. */
+export function githubUrl(): string | undefined {
+  return profile.links.find((link) => link.kind === "github")?.href;
 }
