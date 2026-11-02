@@ -35,6 +35,12 @@ export interface ProjectOverride {
 }
 
 export interface DiscoveryRules {
+  /**
+   * Name of the GitHub list (on the account's Stars page) that defines the portfolio. When set,
+   * exactly the public repositories in that list are shown, and the other rules below only
+   * apply when it is not set. If the list cannot be read, nothing is shown: never every repository.
+   */
+  githubList?: string;
   includeForks: boolean;
   includeArchived: boolean;
   /** When false, only repositories with an override appear (featured or explicitly visible). */

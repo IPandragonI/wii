@@ -5,6 +5,9 @@ interface SwitchProps {
   checked: boolean;
   onChange: (value: boolean) => void;
   icon?: ReactNode;
+  /** Extra spoken status, e.g. "starts on your first tap", with a small visible dot. */
+  note?: string;
+  className?: string;
 }
 
 /**
@@ -16,17 +19,23 @@ interface SwitchProps {
  * (44 − 20 − 2 × 2), so the gaps are equal in both states. The track never shrinks, so a
  * narrow row cannot squeeze the knob outside it.
  */
-export function Switch({ label, checked, onChange, icon }: SwitchProps) {
+export function Switch({ label, checked, onChange, icon, note, className = "" }: SwitchProps) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex min-h-11 items-center gap-2.5 rounded-full border-2 border-white/25 py-1.5 pl-4 pr-2 text-left text-sm font-bold transition-colors hover:border-wii-cyan focus-visible:border-wii-cyan focus-visible:outline-none aria-checked:border-wii-cyan/70"
+      className={`flex min-h-11 items-center gap-2.5 whitespace-nowrap rounded-full border-2 border-white/25 py-1.5 pl-4 pr-2 text-left text-sm font-bold transition-colors hover:border-wii-cyan focus-visible:border-wii-cyan focus-visible:outline-none aria-checked:border-wii-cyan/70 ${className}`}
     >
       {icon}
-      <span>{label}</span>
+      <span className="mr-auto">{label}</span>
+      {note && (
+        <>
+          <span aria-hidden="true" title={note} className="size-2 shrink-0 rounded-full bg-wii-cyan motion-safe:animate-pulse" />
+          <span className="sr-only">{note}</span>
+        </>
+      )}
       <span
         aria-hidden="true"
         data-switch-track

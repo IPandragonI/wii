@@ -20,7 +20,8 @@ export type SoundCue =
   | "homeOpen"
   | "homeClose"
   | "page"
-  | "toggle";
+  | "toggle"
+  | "mail";
 
 export type MusicTrack = "menu" | "channel";
 

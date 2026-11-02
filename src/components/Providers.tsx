@@ -4,7 +4,9 @@ import { Volume2 } from "lucide-react";
 import { AnimatePresence, motion, MotionConfig } from "motion/react";
 import { useEffect, type ReactNode } from "react";
 
+import { EasterEgg } from "@/components/easter-egg/EasterEgg";
 import { HomeMenu } from "@/components/home-menu/HomeMenu";
+import { MessageBoard } from "@/components/message-board/MessageBoard";
 import { usePreferences } from "@/lib/preferences";
 import { FADE_SECONDS, useScreenCovered } from "@/lib/screen-transition";
 import { useCurrentLocale } from "@/i18n/client";
@@ -68,6 +70,8 @@ export function Providers({ children }: { children: ReactNode }) {
     <MotionConfig reducedMotion={motionPreference === "reduced" ? "always" : "user"}>
       {children}
       <HomeMenu />
+      <MessageBoard />
+      <EasterEgg />
       <ScreenFade />
       <MusicHint />
     </MotionConfig>

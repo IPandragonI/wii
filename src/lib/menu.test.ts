@@ -14,8 +14,8 @@ describe("buildMenuChannels", () => {
       "/projects/alpha",
       "/projects/beta",
       "/projects",
-      "/github",
       "/about",
+      "/github",
       "/linkedin",
       "/contact",
     ]);
@@ -23,7 +23,7 @@ describe("buildMenuChannels", () => {
 
   it("gives every built-in channel its own scene", () => {
     const scenes = buildMenuChannels([]).map((channel) => channel.banner);
-    expect(scenes).toEqual(["projects", "github", "about", "linkedin", "contact"]);
+    expect(scenes).toEqual(["projects", "about", "github", "linkedin", "contact"]);
   });
 });
 

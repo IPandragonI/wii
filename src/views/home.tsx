@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { SampleDataNotice } from "@/components/ui/SampleDataNotice";
+import { ListUnavailableNotice, SampleDataNotice } from "@/components/ui/SampleDataNotice";
 import { WiiMenu } from "@/components/wii-menu/WiiMenu";
 import { getProfile, displayName } from "@/config/profile";
 import { LocaleProvider } from "@/i18n/client";
@@ -27,6 +27,11 @@ export async function HomeView({ locale }: { locale: Locale }) {
   return (
     <LocaleProvider locale={locale}>
       <div lang={locale} className="flex min-h-dvh flex-col">
+        {data.listUnavailable && (
+          <div className="px-4 pt-4">
+            <ListUnavailableNotice unavailable locale={locale} />
+          </div>
+        )}
         {data.source === "fallback" && (
           <div className="px-4 pt-4">
             <SampleDataNotice source={data.source} locale={locale} />

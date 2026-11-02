@@ -80,10 +80,15 @@ export function decideVisibility(
   repository: GitHubRepository,
   override: ProjectOverride | undefined,
   rules: DiscoveryRules,
+  listIds?: ReadonlySet<number> | null,
 ): VisibilityDecision {
   if (repository.isPrivate) return "hidden";
   if (override?.visible === false) return "hidden";
   if (rules.hiddenRepositories.some((name) => name.toLowerCase() === repository.name.toLowerCase())) return "hidden";
+
+  // With a GitHub list, membership is the only rule: the owner chose these repositories, forks
+  // and archived ones included, and everything outside the list is out.
+  if (listIds) return listIds.has(repository.id) ? "explicit" : "hidden";
 
   if (override && (override.featured || override.visible === true)) return "explicit";
   if (repository.fork && !rules.includeForks) return "hidden";
@@ -385,6 +390,8 @@ export interface BuildPortfolioInput {
   overrides: ProjectOverride[];
   rules: DiscoveryRules;
   languages?: Map<number, string[]>;
+  /** IDs from the GitHub list; when given, only these repositories are shown. */
+  listIds?: ReadonlySet<number> | null;
 }
 
 export interface BuildPortfolioOutput {
@@ -398,8 +405,22 @@ export function buildPortfolio(input: BuildPortfolioInput): BuildPortfolioOutput
   const repositories = [...new Map(input.repositories.map((repository) => [repository.id, repository])).values()];
 
   const visible = repositories.filter(
-    (repository) => decideVisibility(repository, findOverride(index, repository), input.rules) !== "hidden",
+    (repository) => decideVisibility(repository, findOverride(index, repository), input.rules, input.listIds) !== "hidden",
   );
+
+  if (input.listIds) {
+    const known = new Set(repositories.map((repository) => repository.id));
+    const missing = [...input.listIds].filter((id) => !known.has(id)).length;
+    if (missing) {
+      issues.push(configIssue(`${missing} repository(ies) in the GitHub list are not public repositories of the configured account and were skipped`));
+    }
+    for (const repository of repositories) {
+      const override = findOverride(index, repository);
+      if (override && !input.listIds.has(repository.id) && override.visible !== false) {
+        issues.push(configIssue(`"${repository.name}" has an override but is not in the GitHub list, so it is not shown`));
+      }
+    }
+  }
 
   const usedOverrides = new Set(repositories.map((repository) => findOverride(index, repository)).filter(Boolean));
   for (const override of input.overrides) {

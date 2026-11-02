@@ -110,4 +110,9 @@ export const SYNTH_CUES: Record<SoundCue, (ctx: BaseAudioContext, out: AudioNode
     tick(ctx, out, t + 0.02, 1900, 0.04);
   },
   toggle: (ctx, out, t) => tick(ctx, out, t, 1250, 0.09),
+  // New message: three rising bells, like the console's mail chime (original, not a recording).
+  mail: (ctx, out, t) => {
+    [84, 91, 96].forEach((note, index) => bell(ctx, out, t + index * 0.17, note, 0.09, 1.2));
+    whoosh(ctx, out, t + 0.3, 1800, 6000, 0.6, 0.05);
+  },
 };

@@ -10,7 +10,7 @@ import { playSound } from "@/lib/sound";
  * middle, in viewBox units (1000 wide) so the curves always span the same share of the
  * screen. Strokes don't scale, so the lines stay hairline-thin at any width.
  */
-function shelfEdge(dip: number) {
+export function shelfEdge(dip: number) {
   return `M0 4 C 170 4 220 ${dip} 380 ${dip} L 620 ${dip} C 780 ${dip} 830 4 1000 4`;
 }
 
@@ -59,20 +59,23 @@ interface RoundButtonProps {
   href?: string;
   onClick?: MouseEventHandler<HTMLElement>;
   haspopup?: boolean;
+  /** A small marker on the button's corner, e.g. the unread-message count. */
+  badge?: ReactNode;
 }
 
 /** The big round buttons sitting in the bar's raised ends. */
-export function ConsoleRoundButton({ label, icon, size = "large", href, onClick, haspopup }: RoundButtonProps) {
+export function ConsoleRoundButton({ label, icon, size = "large", href, onClick, haspopup, badge }: RoundButtonProps) {
   const face = (
     <>
       <span className={`${ROUND} ${size === "large" ? "h-[70px] w-[70px]" : "h-12 w-12"}`}>{icon}</span>
+      {badge}
       <span className="sr-only">{label}</span>
     </>
   );
   const shared = {
     title: label,
     onPointerEnter: () => playSound("buttonHover"),
-    className: "group rounded-full outline-none",
+    className: "group relative rounded-full outline-none",
   };
   if (href) {
     return (

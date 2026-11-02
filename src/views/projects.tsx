@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { ChannelScreen } from "@/components/channel/ChannelScreen";
-import { SampleDataNotice } from "@/components/ui/SampleDataNotice";
+import { ListUnavailableNotice, SampleDataNotice } from "@/components/ui/SampleDataNotice";
 import { WiiChannel } from "@/components/wii-menu/WiiChannel";
 import { LocaleProvider } from "@/i18n/client";
 import { alternatesFor, type Locale } from "@/i18n/config";
@@ -27,6 +27,7 @@ export async function ProjectsView({ locale }: { locale: Locale }) {
       <ChannelScreen title={t.channels.projects.title} icon="projects">
         <div className="mb-6 space-y-3">
           <SampleDataNotice source={data.source} locale={locale} />
+          <ListUnavailableNotice unavailable={data.listUnavailable} locale={locale} />
           <p className="max-w-2xl text-lg">
             {data.projects.length === 0 ? t.projects.empty : t.projects.count(data.projects.length)}
           </p>

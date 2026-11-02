@@ -2,6 +2,10 @@
 
 import { useSyncExternalStore } from "react";
 
+import { useLocale, useMessages } from "@/i18n/client";
+import { INTL_LOCALE } from "@/i18n/config";
+import { registerClockTap, triggerEasterEgg } from "@/lib/easter-egg";
+
 let now = 0;
 const listeners = new Set<() => void>();
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -60,17 +64,25 @@ export function clockParts(date: Date, locale?: string): ClockParts {
   };
 }
 
-/** Local time and date in the visitor's own timezone and locale conventions. */
+/**
+ * The visitor's local time (their own timezone) formatted in the page's selected language:
+ * the language decides the format (24-hour or AM/PM, weekday names, day/month order), never the time.
+ */
 export function WiiClock({ compact = false }: { compact?: boolean }) {
   const minute = useMinute();
+  const locale = INTL_LOCALE[useLocale()];
+  const t = useMessages();
   const date = minute === null ? null : new Date(minute * 60_000);
 
-  const time = date ? clockParts(date) : null;
-  const day = date?.toLocaleDateString(undefined, { weekday: "short", month: "numeric", day: "numeric" });
-  const full = date?.toLocaleString(undefined, { dateStyle: "full", timeStyle: "short" });
+  const time = date ? clockParts(date, locale) : null;
+  const day = date?.toLocaleDateString(locale, { weekday: "short", month: "numeric", day: "numeric" });
+  const full = date?.toLocaleString(locale, { dateStyle: "full", timeStyle: "short" });
 
   return (
-    <div className="flex flex-col items-center leading-none" role="timer" aria-live="off" aria-label={full ?? "Current time"}>
+    <div
+      className="flex flex-col items-center leading-none"
+      onClick={() => registerClockTap() && triggerEasterEgg()}
+      role="timer" aria-live="off" aria-label={full ?? t.common.currentTime}>
       <div className="flex items-end gap-1.5" aria-hidden="true">
         <span
           className={`relative font-segments tracking-[0.04em] text-[#9aa0a7] [text-shadow:0_1px_0_#fff] ${

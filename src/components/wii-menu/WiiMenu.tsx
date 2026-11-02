@@ -14,6 +14,7 @@ import { playSound, setMusic } from "@/lib/sound";
 
 const LAST_CHANNEL_KEY = "wii-portfolio:last-channel";
 const COLUMNS = 4;
+const INTRO_STEP_MS = 70;
 const ROWS = 3;
 
 /** Zooms happen around a channel, so the grid's transform origin follows the channel. */
@@ -67,6 +68,13 @@ export function WiiMenu({ channels, heading }: { channels: MenuChannel[]; headin
   const [page, setPage] = useState(0);
   const [opening, setOpening] = useState<Opening | null>(null);
   const [closing, setClosing] = useState(false);
+  // The first time the menu appears, its channels pop in one after another; afterwards (returning
+  // from a channel, which re-shows the same menu) they do not replay.
+  const [intro, setIntro] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setIntro(false), INTRO_STEP_MS * CHANNELS_PER_PAGE + 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   const pages: MenuChannel[][] = [];
   for (let index = 0; index < Math.max(channels.length, 1); index += CHANNELS_PER_PAGE) {
@@ -188,8 +196,14 @@ export function WiiMenu({ channels, heading }: { channels: MenuChannel[]; headin
                   aria-label={pages.length > 1 ? t.common.pageOf(pageIndex + 1, pages.length) : undefined}
                   className="grid w-full shrink-0 grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-x-[2.2%] sm:gap-y-[clamp(10px,2.6vh,24px)] sm:px-1"
                 >
-                  {pageChannels.map((channel) => (
-                    <WiiChannel key={channel.key} channel={channel} onOpen={open} onFocus={() => setPage(pageIndex)} />
+                  {pageChannels.map((channel, index) => (
+                    <WiiChannel
+                      key={channel.key}
+                      channel={channel}
+                      onOpen={open}
+                      onFocus={() => setPage(pageIndex)}
+                      introDelay={intro && pageIndex === 0 ? 250 + index * INTRO_STEP_MS : undefined}
+                    />
                   ))}
                   {Array.from({ length: CHANNELS_PER_PAGE - pageChannels.length }, (_, index) => (
                     <EmptyChannel key={`empty-${index}`} />

@@ -1,3 +1,4 @@
+import { MiiPortrait } from "@/components/ui/MiiPortrait";
 import { at } from "@/components/ui/scenes/shared";
 
 /** LinkedIn: a profile card at the center of a small professional network. */
@@ -49,13 +50,7 @@ export function LinkedInScene() {
       >
         <span className="absolute inset-x-0 top-0 h-[12cqh]" style={{ background: `linear-gradient(120deg, ${LINKEDIN_BLUE}, #378fe9)` }} />
         <span className="absolute left-[4cqh] top-[5cqh] h-[14cqh] w-[14cqh] overflow-hidden rounded-full border-[0.8cqh] border-white bg-[#e8f3fc]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/models/mii/wave-a.png"
-            alt=""
-            draggable={false}
-            className="absolute left-1/2 top-[-6%] h-[230%] max-w-none -translate-x-[46%]"
-          />
+          <MiiPortrait />
         </span>
         <span className="absolute left-[4cqh] top-[22cqh] h-[3cqh] w-[28cqh] rounded-full bg-[#1d2226]/80" />
         <span className="absolute left-[4cqh] top-[27.5cqh] h-[2.2cqh] w-[36cqh] rounded-full bg-[#1d2226]/25" />

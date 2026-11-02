@@ -14,13 +14,15 @@ interface WiiChannelProps {
   channel: MenuChannel;
   onOpen?: (channel: MenuChannel, art: HTMLElement) => void;
   onFocus?: (event: FocusEvent<HTMLAnchorElement>) => void;
+  /** On the menu's first appearance, the channel pops in after this many milliseconds. */
+  introDelay?: number;
 }
 
 /**
  * One channel frame: a light gray rounded frame around the channel's animated banner.
  * Pointing at it lights a pulsing blue outline and ticks, like the console menu.
  */
-export function WiiChannel({ channel, onOpen, onFocus }: WiiChannelProps) {
+export function WiiChannel({ channel, onOpen, onFocus, introDelay }: WiiChannelProps) {
   const { enterChannel } = useScreenNavigation();
   const artRef = useRef<HTMLSpanElement>(null);
   const t = useMessages();
@@ -38,7 +40,10 @@ export function WiiChannel({ channel, onOpen, onFocus }: WiiChannelProps) {
   };
 
   return (
-    <li className="list-none select-none">
+    <li
+      className={`list-none select-none ${introDelay === undefined ? "" : "wii-channel-in"}`}
+      style={introDelay === undefined ? undefined : { animationDelay: `${introDelay}ms` }}
+    >
       <Link
         href={channel.href}
         data-channel={channel.key}

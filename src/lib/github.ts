@@ -175,3 +175,111 @@ function dedupeById(repositories: GitHubRepository[]): GitHubRepository[] {
   for (const repository of repositories) seen.set(repository.id, repository);
   return [...seen.values()];
 }
+
+// ---------------------------------------------------------------------------------------------
+// GitHub Lists
+//
+// A "list" is one of the named collections on a user's Stars page. REST has no endpoint for
+// them; GraphQL exposes them as `User.lists`. GraphQL always needs a token, even for public data.
+
+const GRAPHQL_URL = `${API_ROOT}/graphql`;
+const MAX_LIST_PAGES = 20;
+
+const listsQuery = `query($login: String!) {
+  user(login: $login) { lists(first: 100) { nodes { id name slug } } }
+}`;
+const itemsQuery = `query($id: ID!, $after: String) {
+  node(id: $id) { ... on UserList { items(first: 100, after: $after) {
+    pageInfo { hasNextPage endCursor }
+    nodes { __typename ... on Repository { databaseId isPrivate } }
+  } } }
+}`;
+
+const listsSchema = z.object({
+  data: z.object({ user: z.object({ lists: z.object({ nodes: z.array(z.object({ id: z.string(), name: z.string(), slug: z.string() })) }) }).nullable() }),
+});
+const itemsSchema = z.object({
+  data: z.object({
+    node: z
+      .object({
+        items: z.object({
+          pageInfo: z.object({ hasNextPage: z.boolean(), endCursor: z.string().nullable() }),
+          nodes: z.array(z.object({ __typename: z.string(), databaseId: z.number().optional(), isPrivate: z.boolean().optional() }).nullable()),
+        }),
+      })
+      .nullable(),
+  }),
+});
+
+/** True when the GraphQL response reports errors (they arrive with HTTP 200). */
+function graphqlErrors(body: unknown): string | null {
+  const errors = (body as { errors?: { message?: string }[] } | null)?.errors;
+  return Array.isArray(errors) && errors.length ? errors.map((error) => error.message ?? "error").join("; ") : null;
+}
+
+/**
+ * The IDs of the public repositories in the user's GitHub list called `listName` (matched by
+ * name or slug, case-insensitively). Every failure is reported, never papered over: a missing
+ * token, a rejected token, an unknown list, or a GraphQL error all return `ok: false`.
+ */
+export async function fetchListRepositoryIds(
+  username: string,
+  listName: string,
+  options: GitHubClientOptions = {},
+): Promise<ProviderResult<number[]>> {
+  if (!isValidGitHubUsername(username)) {
+    return { ok: false, error: "GITHUB_USERNAME is not a valid GitHub username", transient: false };
+  }
+  if (!options.token) {
+    return { ok: false, error: `GITHUB_TOKEN is required to read the GitHub list "${listName}" (GraphQL needs authentication)`, transient: false };
+  }
+
+  const post = (query: string, variables: Record<string, unknown>) =>
+    getJson({
+      url: GRAPHQL_URL,
+      method: "POST",
+      body: JSON.stringify({ query, variables }),
+      headers: { ...headers(options.token), "Content-Type": "application/json" },
+      revalidate: options.revalidate,
+      tags: options.tags,
+      fetchImpl: options.fetchImpl,
+    });
+  const failure = (error: string, transient: boolean): ProviderResult<number[]> => ({ ok: false, error: `GitHub ${error}`, transient });
+
+  const lists = await post(listsQuery, { login: username });
+  if (!lists.ok) {
+    const hint = /HTTP (401|403)/.test(lists.error) && !lists.transient ? " (check GITHUB_TOKEN)" : "";
+    return failure(`${lists.error}${hint}`, lists.transient);
+  }
+  const problem = graphqlErrors(lists.data.body);
+  if (problem) return failure(`GraphQL error while reading lists: ${problem}`, false);
+  const parsedLists = listsSchema.safeParse(lists.data.body);
+  if (!parsedLists.success) return failure("returned an unexpected lists response", true);
+  const wanted = listName.trim().toLowerCase();
+  const list = parsedLists.data.data.user?.lists.nodes.find(
+    (candidate) => candidate.name.toLowerCase() === wanted || candidate.slug.toLowerCase() === wanted,
+  );
+  if (!list) {
+    return failure(`list "${listName}" was not found for ${username} (it may be private and invisible to this token, or renamed)`, false);
+  }
+
+  const ids: number[] = [];
+  let after: string | null = null;
+  for (let page = 0; page < MAX_LIST_PAGES; page += 1) {
+    const items = await post(itemsQuery, { id: list.id, after });
+    if (!items.ok) return failure(items.error, items.transient);
+    const itemsProblem = graphqlErrors(items.data.body);
+    if (itemsProblem) return failure(`GraphQL error while reading list items: ${itemsProblem}`, false);
+    const parsed = itemsSchema.safeParse(items.data.body);
+    const connection = parsed.success ? parsed.data.data.node?.items : undefined;
+    if (!connection) return failure("returned an unexpected list items response", true);
+
+    for (const node of connection.nodes) {
+      // Gists and other item types can also be listed; only public repositories are projects.
+      if (node?.__typename === "Repository" && node.databaseId !== undefined && !node.isPrivate) ids.push(node.databaseId);
+    }
+    if (!connection.pageInfo.hasNextPage) return { ok: true, data: [...new Set(ids)] };
+    after = connection.pageInfo.endCursor;
+  }
+  return failure(`list "${listName}" has more than ${MAX_LIST_PAGES * 100} items`, false);
+}

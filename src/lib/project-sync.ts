@@ -1,6 +1,6 @@
 import "server-only";
 
-import { fetchPublicRepositories, fetchRepositoryLanguages, isValidGitHubUsername } from "@/lib/github";
+import { fetchListRepositoryIds, fetchPublicRepositories, fetchRepositoryLanguages, isValidGitHubUsername } from "@/lib/github";
 import type { FetchLike } from "@/lib/http";
 import { bannerFromText, buildFallbackPortfolio, buildPortfolio, compareByRecency, decideVisibility, findOverride, indexOverrides } from "@/lib/project-normalizer";
 import { probeSite } from "@/lib/site-probe";
@@ -122,6 +122,21 @@ export async function syncPortfolio(
     return fallback([{ provider: "github", message: github.error, transient: github.transient }]);
   }
 
+  // The GitHub list decides which repositories are projects. If it cannot be read, show none
+  // (and say why) rather than guessing: an empty set hides everything.
+  let listIds: ReadonlySet<number> | null = null;
+  let listUnavailable = false;
+  if (config.rules.githubList) {
+    const list = await fetchListRepositoryIds(env.githubUsername, config.rules.githubList, { ...cache, token: githubToken });
+    if (list.ok) {
+      listIds = new Set(list.data);
+    } else {
+      listIds = new Set();
+      listUnavailable = true;
+      issues.push({ provider: "github", message: list.error, transient: list.transient });
+    }
+  }
+
   let vercelProjects: VercelProjectInfo[] | null = null;
   if (vercel?.ok && env.vercelToken) {
     vercelProjects = await withProductionDomains(vercel.data, {
@@ -145,7 +160,7 @@ export async function syncPortfolio(
   const curated = github.data
     .filter((repository) => {
       const override = findOverride(index, repository);
-      return override && decideVisibility(repository, override, config.rules) !== "hidden";
+      return (listIds || override) && decideVisibility(repository, override, config.rules, listIds) !== "hidden";
     })
     .slice(0, MAX_LANGUAGE_LOOKUPS);
   const languageResults = await Promise.all(
@@ -166,6 +181,7 @@ export async function syncPortfolio(
     overrides: config.overrides,
     rules: config.rules,
     languages,
+    listIds,
   });
 
   const projects = await enrichWithSiteInfo(built.projects, cache);
@@ -179,6 +195,7 @@ export async function syncPortfolio(
     issues: [...issues, ...built.issues],
     vercelEnabled,
     githubProfileUrl,
+    listUnavailable,
   };
 }
 

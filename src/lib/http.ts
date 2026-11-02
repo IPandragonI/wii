@@ -5,6 +5,9 @@ export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>
 export interface JsonRequest {
   url: string;
   headers?: Record<string, string>;
+  /** Defaults to GET. POST is used for GraphQL. */
+  method?: "GET" | "POST";
+  body?: string;
   /** Seconds to keep the response in the Next.js data cache. Only 200 responses are cached. */
   revalidate?: number;
   tags?: string[];
@@ -30,7 +33,8 @@ export async function getJson(request: JsonRequest): Promise<ProviderResult<Json
   let response: Response;
   try {
     response = await fetchImpl(request.url, {
-      method: "GET",
+      method: request.method ?? "GET",
+      body: request.body,
       headers: request.headers,
       signal: AbortSignal.timeout(request.timeoutMs ?? DEFAULT_TIMEOUT_MS),
       next: { revalidate: request.revalidate, tags: request.tags },

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Globe, House, Minus, Music, Plus, RotateCcw, Volume2 } from "lucide-react";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
+import { shelfEdge } from "@/components/ui/ConsoleBar";
 import { Switch } from "@/components/ui/Switch";
 import { LOCALES, localePath, parseLocalePath, type Locale } from "@/i18n/config";
 import { rememberLocale, useCurrentLocale } from "@/i18n/client";
@@ -110,11 +111,14 @@ export function HomeMenu() {
             </motion.div>
 
             <motion.footer
-              className="relative z-10 border-t border-white/10 bg-gradient-to-b from-[#2e3237]/95 to-[#1d2024]/95 px-5 py-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_-6px_24px_rgb(0_0_0/0.3)] sm:px-10"
+              className="relative z-10"
               variants={{ closed: { y: "100%" }, open: { y: 0 } }}
               transition={{ duration: 0.28, ease: EASE }}
             >
-              <HomeSettings t={t} locale={locale} onLanguage={switchLanguage} />
+              <ShelfCrest />
+              <div className="max-h-[62dvh] overflow-y-auto bg-gradient-to-b from-[#2b2f34]/95 to-[#1d2024]/95 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-6px_24px_rgb(0_0_0/0.3)] sm:px-10">
+                <HomeSettings t={t} locale={locale} onLanguage={switchLanguage} />
+              </div>
             </motion.footer>
           </motion.div>
         )}
@@ -139,6 +143,35 @@ function HomeButton({ children, icon, onClick }: { children: ReactNode; icon: Re
 
 const LANGUAGE_NAMES: Record<Locale, string> = { en: "English", fr: "Français" };
 
+/**
+ * The top edge of the bottom bar: the same long, shallow sweep and light-blue edge line as the
+ * menu's console bar, so the two screens share one visual language. The controls sit below it,
+ * on the flat part, and never overlap the curve.
+ */
+function ShelfCrest() {
+  const glowId = useId();
+  const edge = shelfEdge(24);
+  return (
+    <svg aria-hidden="true" viewBox="0 0 1000 28" preserveAspectRatio="none" className="pointer-events-none block h-7 w-full">
+      <defs>
+        <linearGradient id={glowId} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#5cc8ee" stopOpacity="0.9" />
+          <stop offset="0.5" stopColor="#9ad9f1" stopOpacity="0.75" />
+          <stop offset="1" stopColor="#5cc8ee" stopOpacity="0.9" />
+        </linearGradient>
+      </defs>
+      <path d={`${edge} L1000 28 L0 28 Z`} fill="#2b2f34" fillOpacity="0.95" />
+      <path d={edge} fill="none" stroke="#7fd2f0" strokeOpacity="0.28" strokeWidth="6" vectorEffect="non-scaling-stroke" />
+      <path d={edge} fill="none" stroke={`url(#${glowId})`} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+}
+
+/**
+ * Two deliberate rows, whatever the width: volume on the left and language on the right, then
+ * the four toggles in an even grid (four across, then two, then one as space runs out). Every
+ * control is a single, non-wrapping line; the grid changes the number of columns, never the text.
+ */
 function HomeSettings({ t, locale, onLanguage }: { t: Messages; locale: Locale; onLanguage: (locale: Locale) => void }) {
   const preferences = usePreferences();
   const musicStatus = useMusicStatus();
@@ -148,71 +181,79 @@ function HomeSettings({ t, locale, onLanguage }: { t: Messages; locale: Locale; 
   };
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-8 gap-y-4">
-      <div className="flex items-center gap-3" role="group" aria-label={t.homeMenu.volume}>
-        <Volume2 aria-hidden="true" size={22} className="text-white/70" />
-        <RoundIconButton
-          label={t.homeMenu.lowerVolume}
-          disabled={preferences.volume === 0}
-          onClick={() => update({ volume: preferences.volume - 1 })}
-        >
-          <Minus aria-hidden="true" size={18} strokeWidth={3} />
-        </RoundIconButton>
-        <div className="flex items-end gap-1" aria-hidden="true">
-          {Array.from({ length: MAX_VOLUME }, (_, index) => (
-            <span
-              key={index}
-              className={`w-3 rounded-sm transition-colors ${index < preferences.volume ? "bg-wii-cyan" : "bg-white/20"}`}
-              style={{ height: 10 + index * 6 }}
-            />
-          ))}
+    <div className="mx-auto grid w-full max-w-5xl gap-4">
+      <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
+        <div className="flex items-center gap-3 whitespace-nowrap" role="group" aria-label={t.homeMenu.volume}>
+          <Volume2 aria-hidden="true" size={22} className="text-white/70" />
+          <RoundIconButton
+            label={t.homeMenu.lowerVolume}
+            disabled={preferences.volume === 0}
+            onClick={() => update({ volume: preferences.volume - 1 })}
+          >
+            <Minus aria-hidden="true" size={18} strokeWidth={3} />
+          </RoundIconButton>
+          <div className="flex items-end gap-1" aria-hidden="true">
+            {Array.from({ length: MAX_VOLUME }, (_, index) => (
+              <span
+                key={index}
+                className={`w-3 rounded-sm transition-colors ${index < preferences.volume ? "bg-wii-cyan" : "bg-white/20"}`}
+                style={{ height: 10 + index * 6 }}
+              />
+            ))}
+          </div>
+          <span className="sr-only" aria-live="polite">
+            {t.homeMenu.volumeStatus(preferences.volume, MAX_VOLUME)}
+          </span>
+          <RoundIconButton
+            label={t.homeMenu.raiseVolume}
+            disabled={preferences.volume === MAX_VOLUME}
+            onClick={() => update({ volume: preferences.volume + 1 })}
+          >
+            <Plus aria-hidden="true" size={18} strokeWidth={3} />
+          </RoundIconButton>
         </div>
-        <span className="sr-only" aria-live="polite">
-          {t.homeMenu.volumeStatus(preferences.volume, MAX_VOLUME)}
-        </span>
-        <RoundIconButton
-          label={t.homeMenu.raiseVolume}
-          disabled={preferences.volume === MAX_VOLUME}
-          onClick={() => update({ volume: preferences.volume + 1 })}
-        >
-          <Plus aria-hidden="true" size={18} strokeWidth={3} />
-        </RoundIconButton>
+
+        <div className="flex items-center gap-2 whitespace-nowrap" role="group" aria-label={t.homeMenu.language}>
+          <Globe aria-hidden="true" size={18} className="text-white/70" />
+          <div className="flex rounded-full border-2 border-white/25 p-1">
+            {LOCALES.map((option) => (
+              <button
+                key={option}
+                type="button"
+                lang={option}
+                aria-pressed={option === locale}
+                onClick={() => onLanguage(option)}
+                className="rounded-full px-3 py-1.5 text-sm font-bold transition-colors hover:text-wii-cyan aria-pressed:bg-wii-cyan aria-pressed:text-white"
+              >
+                {LANGUAGE_NAMES[option]}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <Switch
-        label={musicStatus === "blocked" ? t.homeMenu.musicWaiting : t.homeMenu.music}
-        icon={<Music aria-hidden="true" size={16} />}
-        checked={preferences.music}
-        onChange={(music) => update({ music })}
-      />
-      <Switch label={t.homeMenu.soundEffects} checked={preferences.sound} onChange={(sound) => update({ sound })} />
-      <Switch
-        label={t.homeMenu.reducedMotion}
-        checked={preferences.motion === "reduced"}
-        onChange={(reduced) => update({ motion: reduced ? "reduced" : "system" })}
-      />
-      <Switch
-        label={t.homeMenu.handPointer}
-        checked={preferences.cursor === "hand"}
-        onChange={(hand) => update({ cursor: hand ? "hand" : "system" })}
-      />
-
-      <div className="flex items-center gap-2" role="group" aria-label={t.homeMenu.language}>
-        <Globe aria-hidden="true" size={18} className="text-white/70" />
-        <div className="flex rounded-full border-2 border-white/25 p-1">
-          {LOCALES.map((option) => (
-            <button
-              key={option}
-              type="button"
-              lang={option}
-              aria-pressed={option === locale}
-              onClick={() => onLanguage(option)}
-              className="rounded-full px-3 py-1.5 text-sm font-bold transition-colors hover:text-wii-cyan aria-pressed:bg-wii-cyan aria-pressed:text-white"
-            >
-              {LANGUAGE_NAMES[option]}
-            </button>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 gap-2 min-[560px]:grid-cols-2 lg:grid-cols-4">
+        <Switch
+          className="w-full"
+          label={t.homeMenu.music}
+          note={musicStatus === "blocked" ? t.homeMenu.musicWaiting : undefined}
+          icon={<Music aria-hidden="true" size={16} />}
+          checked={preferences.music}
+          onChange={(music) => update({ music })}
+        />
+        <Switch className="w-full" label={t.homeMenu.soundEffects} checked={preferences.sound} onChange={(sound) => update({ sound })} />
+        <Switch
+          className="w-full"
+          label={t.homeMenu.reducedMotion}
+          checked={preferences.motion === "reduced"}
+          onChange={(reduced) => update({ motion: reduced ? "reduced" : "system" })}
+        />
+        <Switch
+          className="w-full"
+          label={t.homeMenu.handPointer}
+          checked={preferences.cursor === "hand"}
+          onChange={(hand) => update({ cursor: hand ? "hand" : "system" })}
+        />
       </div>
     </div>
   );

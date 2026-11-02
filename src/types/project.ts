@@ -6,7 +6,7 @@
 export type ProjectStatus = "production" | "development" | "archived";
 
 /** The animated scene behind a project channel's banner, chosen to match what the project is. */
-export const BANNER_THEMES = ["board", "race", "road", "music", "darts", "network", "island", "arcade", "app"] as const;
+export const BANNER_THEMES = ["board", "race", "road", "music", "darts", "network", "island", "arcade", "app", "duel", "plan", "sso"] as const;
 export type BannerTheme = (typeof BANNER_THEMES)[number];
 
 /** Scenes for the built-in channels (Projects, GitHub, About, LinkedIn, Contact). */
@@ -81,6 +81,8 @@ export interface PortfolioData {
   lastSyncedAt: string;
   issues: ProviderIssue[];
   vercelEnabled: boolean;
+  /** True when a GitHub list is configured but could not be read, so no projects are shown. */
+  listUnavailable?: boolean;
   /** Public profile URL of the configured GitHub account, when one is configured. */
   githubProfileUrl?: string;
 }

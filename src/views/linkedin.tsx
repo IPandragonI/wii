@@ -2,6 +2,7 @@ import { BriefcaseBusiness, ExternalLink, GraduationCap, MapPin } from "lucide-r
 import type { Metadata } from "next";
 
 import { ChannelScreen } from "@/components/channel/ChannelScreen";
+import { MiiPortrait } from "@/components/ui/MiiPortrait";
 import { displayName, getProfile, linkedinUrl } from "@/config/profile";
 import { LocaleProvider } from "@/i18n/client";
 import { alternatesFor, type Locale } from "@/i18n/config";
@@ -52,9 +53,8 @@ export function LinkedInView({ locale }: { locale: Locale }) {
           <section className="wii-panel max-w-3xl overflow-hidden" aria-labelledby="linkedin-name">
             <div className="h-24 bg-gradient-to-r from-[#0a66c2] to-[#378fe9] sm:h-28" />
             <div className="px-6 pb-6 sm:px-8 sm:pb-8">
-              <div className="-mt-12 flex h-24 w-24 items-end justify-center overflow-hidden rounded-full border-4 border-white bg-[#e8f3fc] shadow-channel">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/models/mii/wave-a.png" alt="" className="h-[150%] max-w-none translate-y-[22%]" />
+              <div className="relative -mt-12 h-24 w-24 overflow-hidden rounded-full border-4 border-white bg-[#e8f3fc] shadow-channel">
+                <MiiPortrait />
               </div>
               <h2 id="linkedin-name" className="mt-4 text-2xl font-extrabold text-wii-ink-strong">
                 {profile.name}
