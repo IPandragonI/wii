@@ -280,6 +280,19 @@ html[data-motion="reduced"] .wii-shine::after {
 .wii-impact { opacity: 0; animation: wii-impact 4.8s ease-out infinite; }
 .wii-throw { opacity: 0.25; animation: wii-throw 4.8s steps(1) infinite; }
 
+/* Career compass: the needle hunts left and right, then settles on north */
+.wii-compass { animation: wii-compass 6s ease-in-out infinite; }
+@keyframes wii-compass {
+  0% { transform: rotate(0); }
+  12% { transform: rotate(48deg); }
+  28% { transform: rotate(-34deg); }
+  44% { transform: rotate(16deg); }
+  58%, 100% { transform: rotate(0); }
+}
+
+/* Darts scoreboard: the remaining score falls as each dart lands */
+.wii-chip { opacity: 0.35; animation: wii-throw 4.8s steps(1) infinite; }
+
 /* Neural network */
 .wii-pulse-line { animation: wii-pulse-line 2.2s linear infinite; }
 .wii-node { animation: wii-node 2.8s ease-in-out infinite; }

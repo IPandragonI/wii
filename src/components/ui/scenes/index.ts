@@ -10,6 +10,8 @@ import { IslandScene } from "@/components/ui/scenes/island";
 import { DuelScene } from "@/components/ui/scenes/duel";
 import { PlanScene } from "@/components/ui/scenes/plan";
 import { SsoScene } from "@/components/ui/scenes/sso";
+import { AutonomousScene } from "@/components/ui/scenes/autonomous";
+import { CompassScene } from "@/components/ui/scenes/compass";
 import { ArcadeScene } from "@/components/ui/scenes/arcade";
 import { AppScene } from "@/components/ui/scenes/app";
 import { ProjectsScene } from "@/components/ui/scenes/projects";
@@ -34,6 +36,8 @@ export const SCENES: Record<ChannelScene, (props: SceneProps) => ReactNode> = {
   duel: DuelScene,
   plan: PlanScene,
   sso: SsoScene,
+  autonomous: AutonomousScene,
+  compass: CompassScene,
   projects: ProjectsScene,
   github: GitHubScene,
   about: AboutScene,

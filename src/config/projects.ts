@@ -104,6 +104,7 @@ export const projectOverrides: ProjectOverride[] = [
     vercelProjectId: "prj_KsXuERfThA0r8Mnu6bsXw2Ws5Omq",
     title: "Checkout",
     channelIcon: "dart",
+    banner: "darts",
     featured: true,
     order: 5,
     technologies: ["TypeScript", "Zustand", "Supabase", "PWA", "Vitest"],
@@ -124,6 +125,7 @@ export const projectOverrides: ProjectOverride[] = [
     repositoryName: "Autonomous_Vehicles",
     title: "Autonomous Vehicles",
     channelIcon: "autonomous",
+    banner: "autonomous",
     order: 6,
     technologies: ["Java", "JavaFX", "Maven", "Neural networks", "Genetic algorithm"],
     details: [

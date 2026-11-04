@@ -107,7 +107,7 @@ describe("banner inference", () => {
   it("recognizes themes in English and French", () => {
     expect(bannerFromText("Accordeur de guitare, bibliothèque d'accords")).toBe("music");
     expect(bannerFromText("Marqueur 501/301 de fléchettes")).toBe("darts");
-    expect(bannerFromText("Neural Network for autonomous vehicles")).toBe("network");
+    expect(bannerFromText("Neural Network for autonomous vehicles")).toBe("autonomous");
     expect(bannerFromText("Une photo, une voiture : trouvez la marque")).toBe("road");
     expect(bannerFromText("A small browser karting game with drifting")).toBe("race");
     expect(bannerFromText("J'ai créé une cartographie")).toBeUndefined();

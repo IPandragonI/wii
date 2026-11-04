@@ -205,6 +205,7 @@ const ICON_BANNERS: Record<string, BannerTheme> = {
   island: "island",
   kart: "race",
   car: "road",
+  autonomous: "autonomous",
   scan: "road",
   game: "arcade",
   code: "app",
@@ -223,11 +224,13 @@ const TOPIC_BANNERS: [string[], BannerTheme][] = [
 
 /**
  * Words in a project's name, description, production hostname, or its site's own title and
- * description that suggest a theme, in English and French. Checked in this order, so a
- * "neural network for autonomous vehicles" is a network before it is a road.
+ * description that suggest a theme, in English and French. Checked in this order, so an
+ * "autonomous vehicles" project is its own scene before it is a road, and a "neural network" is a network.
  */
 const KEYWORD_BANNERS: [string[], BannerTheme][] = [
   [["chess", "checkmate", "stockfish", "echecs"], "board"],
+  [["compass", "career", "careers", "carriere", "carrieres", "orientation"], "compass"],
+  [["autonomous", "autonome", "autonomes", "selfdriving", "driverless"], "autonomous"],
   [["kart", "karting", "racing", "race", "racer", "drift", "drifting", "circuit"], "race"],
   [["guitar", "guitare", "guitarist", "guitarists", "tuner", "accordeur", "chord", "chords", "accords", "music", "musique"], "music"],
   [["dart", "darts", "flechette", "flechettes", "501", "301"], "darts"],

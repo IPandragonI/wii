@@ -56,14 +56,25 @@ export function DartsScene() {
           <path d="M48 8 L66 0 L62 8 L66 16 Z" style={{ fill: "var(--tint)" }} />
         </svg>
       </span>
-      {/* Three throws per turn */}
-      {[0, 1, 2].map((index) => (
-        <span
-          key={index}
-          className="wii-throw wii-ambient absolute rounded-full"
-          style={{ ...at(34 + index * 7, 10, 4.5, 4.5), background: "var(--tint)", animationDelay: `${index * 1.6}s` }}
-        />
-      ))}
+      {/* Scoreboard: the finish for what is left, one chip per dart, lit as each lands */}
+      <span
+        className="absolute flex flex-col items-center justify-center gap-[1.4cqh] rounded-[3cqh] bg-[#1f2530] shadow-[0_1cqh_2.4cqh_rgb(0_0_0/0.28)]"
+        style={at(24, 5, 40, 29)}
+      >
+        <span className="text-[3.6cqh] font-bold uppercase leading-none tracking-[0.3cqh] text-white/60">Checkout</span>
+        <span className="text-[11cqh] font-black leading-none tabular-nums text-white">170</span>
+        <span className="flex gap-[1.2cqh]">
+          {["T20", "T20", "BULL"].map((label, index) => (
+            <span
+              key={index}
+              className="wii-chip wii-ambient rounded-[1.4cqh] px-[1.6cqh] py-[0.8cqh] text-[3.4cqh] font-bold leading-none text-white"
+              style={{ background: index === 2 ? "#d23c3c" : "var(--tint)", animationDelay: `${index * 1.6}s` }}
+            >
+              {label}
+            </span>
+          ))}
+        </span>
+      </span>
     </>
   );
 }
