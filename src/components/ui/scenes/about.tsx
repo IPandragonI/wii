@@ -4,13 +4,13 @@ import { at, type SceneProps } from "@/components/ui/scenes/shared";
 export function AboutScene({ greeting = "Hi!" }: SceneProps) {
   return (
     <>
-      <span className="absolute inset-0 bg-gradient-to-b from-[#dff2fd] via-[#f4fbff] to-white" />
+      <span className="absolute inset-0 bg-gradient-to-b from-[#ffd29a] via-[#ffe9cb] to-[#fff7ea]" />
       <span
         className="absolute bottom-0 left-1/2 h-[90cqh] w-[340cqh] origin-bottom"
         style={{
           transform: "translateX(-50%) perspective(150cqh) rotateX(62deg)",
           background:
-            "linear-gradient(to right, #dfe3e8 0.25cqh, transparent 0.25cqh) 0 0 / 12cqh 12cqh, linear-gradient(to bottom, #dfe3e8 0.25cqh, #f6f7f9 0.25cqh) 0 0 / 12cqh 12cqh",
+            "linear-gradient(to right, #e8d2b2 0.25cqh, transparent 0.25cqh) 0 0 / 12cqh 12cqh, linear-gradient(to bottom, #e8d2b2 0.25cqh, #fbf0de 0.25cqh) 0 0 / 12cqh 12cqh",
         }}
       />
       <span className="wii-bounce wii-ambient absolute" style={at(-40, 6, 60, 70)}>

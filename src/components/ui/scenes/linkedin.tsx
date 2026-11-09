@@ -15,18 +15,18 @@ const CONNECTIONS: [number, number][] = [
 export function LinkedInScene() {
   return (
     <>
-      <span className="absolute inset-0 bg-gradient-to-br from-[#eef5fb] to-[#dbe9f6]" />
+      <span className="absolute inset-0 bg-gradient-to-br from-[#0a66c2] to-[#004182]" />
       <svg viewBox="-188.5 0 377 100" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" aria-hidden="true">
         {CONNECTIONS.map(([x, y], index) => (
           <g key={index}>
-            <line x1={x} y1={y} x2="0" y2="34" stroke={LINKEDIN_BLUE} strokeOpacity="0.2" strokeWidth="0.8" />
+            <line x1={x} y1={y} x2="0" y2="34" stroke="#ffffff" strokeOpacity="0.35" strokeWidth="0.8" />
             <line
               className="wii-pulse-line wii-ambient"
               x1={x}
               y1={y}
               x2="0"
               y2="34"
-              stroke={LINKEDIN_BLUE}
+              stroke="#ffffff"
               strokeWidth="1.4"
               strokeLinecap="round"
               pathLength={100}
@@ -39,8 +39,8 @@ export function LinkedInScene() {
       {CONNECTIONS.map(([x, y], index) => (
         <span
           key={index}
-          className="wii-bounce wii-ambient absolute rounded-full border-[0.7cqh] border-white shadow-[0_0.6cqh_1.6cqh_rgb(10_102_194/0.25)]"
-          style={{ ...at(x - 4.5, y - 4.5, 9, 9), background: index % 2 ? "#70b5f9" : "#378fe9", animationDelay: `${index * -0.35}s` }}
+          className="wii-bounce wii-ambient absolute rounded-full border-[0.7cqh] border-white shadow-[0_0.6cqh_1.6cqh_rgb(0_30_70/0.4)]"
+          style={{ ...at(x - 4.5, y - 4.5, 9, 9), background: index % 2 ? "#cfe6fb" : "#8cc4f7", animationDelay: `${index * -0.35}s` }}
         />
       ))}
       {/* Profile card */}

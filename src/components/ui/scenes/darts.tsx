@@ -40,8 +40,8 @@ function Dartboard() {
 export function DartsScene() {
   return (
     <>
-      <span className="absolute inset-0 bg-gradient-to-b from-[#eef3f8] to-[#dfe7ef]" />
-      <span className="absolute rounded-full bg-black/10" style={at(-25, 6, 92, 92)} />
+      <span className="absolute inset-0 bg-gradient-to-b from-[#3fa263] to-[#1f6b41]" />
+      <span className="absolute rounded-full bg-black/25" style={at(-25, 6, 92, 92)} />
       <span className="wii-spin-slow wii-ambient absolute" style={at(-28, 4, 92, 92)}>
         <Dartboard />
       </span>

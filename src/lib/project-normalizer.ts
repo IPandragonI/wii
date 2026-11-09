@@ -206,6 +206,7 @@ const ICON_BANNERS: Record<string, BannerTheme> = {
   kart: "race",
   car: "road",
   autonomous: "autonomous",
+  atlas: "planisphere",
   scan: "road",
   game: "arcade",
   code: "app",
@@ -237,6 +238,7 @@ const KEYWORD_BANNERS: [string[], BannerTheme][] = [
   [["neural", "network", "agent", "agents", "llm", "intelligence"], "network"],
   [["car", "cars", "vehicle", "vehicles", "automobile", "voiture", "voitures", "auto"], "road"],
   [["island", "islands", "sandbox", "voxel", "ile"], "island"],
+  [["atlas", "globe", "geography", "geographie", "country", "countries", "pays", "continent", "continents"], "planisphere"],
   [["game", "games", "jeu", "jeux", "arcade"], "arcade"],
 ];
 

@@ -280,6 +280,30 @@ html[data-motion="reduced"] .wii-shine::after {
 .wii-impact { opacity: 0; animation: wii-impact 4.8s ease-out infinite; }
 .wii-throw { opacity: 0.25; animation: wii-throw 4.8s steps(1) infinite; }
 
+/* Atlas planisphere, on the same 6s cycle as the Voyo trace (wii-trace): the countries pop in as the
+   line reaches them (about 12.6, 20, 30, 43% of the cycle), then B drops and pings, then all fade. */
+.wii-pin-a, .wii-pin-b { transform-box: fill-box; transform-origin: 50% 100%; }
+.wii-pin-a { animation: wii-pin-a 6s ease-in-out infinite; }
+.wii-pin-b { animation: wii-pin-b 6s ease-in-out infinite; }
+.wii-ping { opacity: 0; animation: wii-ping 6s ease-out infinite; }
+.wii-stop-1 { animation: wii-stop-1 6s ease-out infinite; }
+.wii-stop-2 { animation: wii-stop-2 6s ease-out infinite; }
+.wii-stop-3 { animation: wii-stop-3 6s ease-out infinite; }
+.wii-stop-4 { animation: wii-stop-4 6s ease-out infinite; }
+@keyframes wii-pin-a { 0% { opacity: 0; transform: translateY(-6px); } 5%, 88% { opacity: 1; transform: translateY(0); } 96%, 100% { opacity: 0; transform: translateY(0); } }
+@keyframes wii-pin-b {
+  0%, 52% { opacity: 0; transform: translateY(-10px); }
+  60% { opacity: 1; transform: translateY(0); }
+  64% { transform: translateY(-3px); }
+  68%, 88% { opacity: 1; transform: translateY(0); }
+  96%, 100% { opacity: 0; transform: translateY(0); }
+}
+@keyframes wii-ping { 0%, 60% { opacity: 0; transform: scale(0.4); } 63% { opacity: 0.9; } 82%, 100% { opacity: 0; transform: scale(2.6); } }
+@keyframes wii-stop-1 { 0%, 11% { opacity: 0; transform: scale(0.3); } 15%, 88% { opacity: 1; transform: scale(1); } 96%, 100% { opacity: 0; } }
+@keyframes wii-stop-2 { 0%, 19% { opacity: 0; transform: scale(0.3); } 23%, 88% { opacity: 1; transform: scale(1); } 96%, 100% { opacity: 0; } }
+@keyframes wii-stop-3 { 0%, 29% { opacity: 0; transform: scale(0.3); } 33%, 88% { opacity: 1; transform: scale(1); } 96%, 100% { opacity: 0; } }
+@keyframes wii-stop-4 { 0%, 41% { opacity: 0; transform: scale(0.3); } 45%, 88% { opacity: 1; transform: scale(1); } 96%, 100% { opacity: 0; } }
+
 /* Career compass: the needle hunts left and right, then settles on north */
 .wii-compass { animation: wii-compass 6s ease-in-out infinite; }
 @keyframes wii-compass {
@@ -389,6 +413,11 @@ html[data-motion="reduced"] .mii-breathe {
 .wii-letter { animation: wii-letter 4.8s ease-in-out infinite; }
 .wii-notify { animation: wii-notify 2.4s ease-in-out infinite; }
 
+.wii-marquee { animation: wii-marquee 36s linear infinite; }
+.wii-marquee-rev { animation: wii-marquee-rev 36s linear infinite; }
+/* One pattern repeat is 8 tiles = 320cqh, so the loop is seamless. */
+@keyframes wii-marquee { from { transform: translateX(0); } to { transform: translateX(-320cqh); } }
+@keyframes wii-marquee-rev { from { transform: translateX(-320cqh); } to { transform: translateX(0); } }
 @keyframes wii-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2cqh); } }
 @keyframes wii-cell { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 @keyframes wii-sweep { 0% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 70% { opacity: 1; } 100% { transform: translateX(130cqh); opacity: 0; } }

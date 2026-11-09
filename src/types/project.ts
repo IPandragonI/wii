@@ -6,7 +6,7 @@
 export type ProjectStatus = "production" | "development" | "archived";
 
 /** The animated scene behind a project channel's banner, chosen to match what the project is. */
-export const BANNER_THEMES = ["board", "race", "road", "music", "darts", "network", "island", "arcade", "app", "duel", "plan", "sso", "autonomous", "compass"] as const;
+export const BANNER_THEMES = ["board", "race", "road", "music", "darts", "network", "island", "arcade", "app", "duel", "plan", "sso", "autonomous", "compass", "planisphere"] as const;
 export type BannerTheme = (typeof BANNER_THEMES)[number];
 
 /** Scenes for the built-in channels (Projects, GitHub, About, LinkedIn, Contact). */

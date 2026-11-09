@@ -18,13 +18,34 @@ import type { DiscoveryRules, FallbackProject, ProjectOverride } from "@/types/c
  */
 export const projectOverrides: ProjectOverride[] = [
   {
+    repositoryId: 1450291423,
+    repositoryName: "Atlas",
+    vercelProjectId: "prj_Qk5sa4lANYHqtvWVBAR089jmZr3b",
+    title: "Atlas",
+    channelIcon: "atlas",
+    banner: "planisphere",
+    featured: true,
+    order: 1,
+    technologies: ["Next.js", "TypeScript", "MapLibre GL", "Zustand", "Dexie", "next-intl", "PWA", "Vitest", "Playwright"],
+    details: [
+      "A geography game: connect a start country to a destination through neighbouring countries you type, in as few steps as possible. A daily challenge opens the game straight away, with free play, constraint and regional modes a tap away. French by default with English available, installable as an offline PWA with no backend or account; progress lives in IndexedDB.",
+      "A pure, seeded TypeScript engine decides every move, and a generator checks that each challenge can actually be solved. The world is drawn with MapLibre from bundled GeoJSON (no tile server), and adjacency between the 195 playable states is a reviewed list rather than something derived from polygons.",
+    ].join("\n\n"),
+    highlights: [
+      "Three modes: Classic (land borders), Constraints (forbidden or mandatory countries, minimum coastal states, maritime links) and Regional (a continent or subregion), each in Easy, Normal, Hard or Custom",
+      "Three daily challenges per UTC day, precomputed and bundled so they play offline; the map stays hidden and reveals each country as you find it",
+      "Hints that never use an attempt, a change-of-direction rule that lets you branch back to an earlier country, and a 0-1000 score with the optimal and alternative routes shown at the end",
+      "A hand-curated country graph with optional strait crossings and territorial disputes, covered by 230+ unit tests and Playwright end-to-end runs",
+    ],
+  },
+  {
     repositoryId: 1433429338,
     repositoryName: "Karting",
     vercelProjectId: "prj_h8OkCbF9nDNrtyBcDFkA9rUfx2uj",
     title: "Karting",
     channelIcon: "kart",
     featured: true,
-    order: 1,
+    order: 2,
     technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS", "daisyUI", "three.js"],
     details: [
       "A small browser karting game with arcade drift physics, time trials with sector splits, a live delta and a best-lap ghost. It includes a grid track editor with elevation and bridges, and nine built-in circuits (Monaco, Spa, Monza and Suzuka among them). It was inspired by mrdoob's Starter-Kit-Racing.",
@@ -44,7 +65,7 @@ export const projectOverrides: ProjectOverride[] = [
     title: "Outpost",
     channelIcon: "outpost",
     featured: true,
-    order: 2,
+    order: 3,
     technologies: ["Next.js", "TypeScript", "Stockfish", "WebAssembly", "Web Workers", "IndexedDB", "Playwright"],
     details: [
       "A client-side chess analysis workstation: import games, analyze them with Stockfish running in your browser, review classified moves, explore opening theory and train a repertoire. There is no backend, no account and no telemetry, and games and analyses stay on the device.",
@@ -63,8 +84,7 @@ export const projectOverrides: ProjectOverride[] = [
     vercelProjectId: "prj_CAwVIMA4IJNrlMecZfIYKzXbSCf6",
     title: "Calandre",
     channelIcon: "calandre",
-    featured: true,
-    order: 3,
+    order: 6,
     technologies: ["TypeScript", "PWA", "Vitest", "Playwright"],
     details: [
       "A car-guessing game: one photo, one text box, name the make and model (and the generation, for purists). French by default with English available, installable as a PWA, with no backend or account; preferences, statistics and the garage live in localStorage.",
@@ -126,7 +146,7 @@ export const projectOverrides: ProjectOverride[] = [
     title: "Autonomous Vehicles",
     channelIcon: "autonomous",
     banner: "autonomous",
-    order: 6,
+    order: 7,
     technologies: ["Java", "JavaFX", "Maven", "Neural networks", "Genetic algorithm"],
     details: [
       "A population of cars, each driven by its own neural network with no ML library, learns to drive around 2D tracks by evolution. It was built for the course \"TP — une voiture qui apprend à conduire\" (steps 0 to 38), and a final report with experiments A–F and a champion analysis is in the repository.",
@@ -144,7 +164,7 @@ export const projectOverrides: ProjectOverride[] = [
     repositoryName: "Checkmate",
     title: "Checkmate",
     banner: "duel",
-    order: 7,
+    order: 8,
     productionUrl: "https://checkmate-sigma-rose.vercel.app",
     technologies: ["Next.js", "TypeScript", "Prisma", "PostgreSQL", "Pusher", "chess.js", "Better Auth", "Tailwind CSS"],
     details: [
@@ -163,7 +183,7 @@ export const projectOverrides: ProjectOverride[] = [
     repositoryName: "Authserver",
     title: "AuthServer",
     banner: "sso",
-    order: 8,
+    order: 9,
     technologies: ["Java", "Spring Boot", "Liquibase", "Maven", "Docker", "MkDocs"],
     details: [
       "A Master 2 teaching project on single sign-on: building a centralised authentication service from A to Z with Java Spring Boot, with Liquibase migrations and Maven configuration. The application is in the app directory and the course itself in courses.",
@@ -179,7 +199,7 @@ export const projectOverrides: ProjectOverride[] = [
     repositoryName: "Voyo",
     title: "Voyo",
     banner: "plan",
-    order: 9,
+    order: 10,
     technologies: ["Flutter", "Dart"],
     details: [
       "A Flutter app for delegating or conducting apartment viewings.",
@@ -204,6 +224,17 @@ export const discoveryRules: DiscoveryRules = {
  */
 export const fallbackProjects: FallbackProject[] = [
   {
+    key: "atlas",
+    name: "Atlas",
+    slug: "atlas",
+    description: "A geography game: connect two countries through the countries between them.",
+    category: "Game",
+    technologies: [],
+    channelIcon: "atlas",
+    banner: "planisphere",
+    order: 1,
+  },
+  {
     key: "karting",
     name: "Karting",
     slug: "karting",
@@ -211,7 +242,7 @@ export const fallbackProjects: FallbackProject[] = [
     category: "Game",
     technologies: [],
     channelIcon: "kart",
-    order: 1,
+    order: 2,
   },
   {
     key: "cherry",
@@ -221,7 +252,7 @@ export const fallbackProjects: FallbackProject[] = [
     category: "Web app",
     technologies: [],
     channelIcon: "cherry",
-    order: 2,
+    order: 4,
   },
   {
     key: "outpost",
@@ -233,16 +264,6 @@ export const fallbackProjects: FallbackProject[] = [
     technologies: [],
     channelIcon: "chess",
     order: 3,
-  },
-  {
-    key: "calandre",
-    name: "Calandre",
-    slug: "calandre",
-    description: "A car quiz: one photo, one car. Find the make and model, from the 2CV to the Bugatti.",
-    category: "Game",
-    technologies: [],
-    channelIcon: "car",
-    order: 4,
   },
   {
     key: "checkout",
